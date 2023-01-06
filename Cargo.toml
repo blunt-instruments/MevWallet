@@ -1,0 +1,16 @@
+[package]
+name = "mev-wallet"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ethers = { path = "../../ethers-rs", features = ["eip712"] }
+once_cell = "1.16.0"
+serde = { version = "1.0.150", features = ["derive"] }
+thiserror = "1.0.37"
+
+[dev-dependencies]
+tokio = { version = "1.23.0", features = ["macros"] }
+tokio-test = "0.4.2"
