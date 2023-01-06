@@ -9,5 +9,5 @@
 	path = lib/mev-weth
 	url = git@github.com:prestwich/mev-weth.git
 [submodule "lib/MevWeth"]
-	path = lib/MevWeth
+	path = lib/mev-weth
 	url = https://github.com/blunt-instruments/MevWeth
