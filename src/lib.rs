@@ -30,10 +30,9 @@ pub static MEV_WETH_ADDR: Lazy<H160> = Lazy::new(|| {
 
 /// MevWalletProxyFactory address
 pub static MEV_WALLET_PROXY_FACTORY_ADDR: Lazy<H160> = Lazy::new(|| {
-    "- MevWalletV0 ProxyFactory: `0x4D9B7DEFfd09bE5cAAbC6ADc976030A45d0A6D31`
-    "
-    .parse()
-    .unwrap()
+    "0x385D9e104941e53fa73BBa3Ec3e9bAA4D1C5ad39"
+        .parse()
+        .unwrap()
 });
 
 #[cfg(test)]
@@ -43,10 +42,10 @@ mod test {
     use crate::TX_TYPEHASH;
 
     #[test]
-    fn it() {
+    fn it_calculates_the_typehash() {
         assert_eq!(
             *TX_TYPEHASH.to_vec(),
-            hex::decode("5679fb6ec38d3c67731b4def49181a8fbbb334cda5c263b0993e50cfe699d4e8")
+            hex::decode("fd4c9c9ceea85482c3671626f7b1c65bc2230325b86dbcb0f971327c3062c26a")
                 .unwrap()
         );
     }

@@ -142,6 +142,7 @@ impl MevTx {
 
 /// A Signed MEV Tx
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SignedMevTx {
     chain_id: u64,
     wallet: Address,
@@ -200,5 +201,33 @@ impl SignedMevTx {
     /// Get the signature
     pub fn sig(&self) -> Signature {
         self.sig
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn it_generates_json_output() {
+        let tx = SignedMevTx {
+            chain_id: 31337,
+            wallet: Address::zero(),
+            tx: MevTx {
+                to: Address::zero(),
+                data: "0x1234abcd".parse().unwrap(),
+                value: 500.into(),
+                delegate: true,
+                tip: 9000.into(),
+                max_base_fee: 83.into(),
+                timing: 123845.into(),
+                nonce: 16.into(),
+            },
+            sig: Signature {
+                r: U256::from(851929865),
+                s: U256::from(1273717),
+                v: 18,
+            },
+        };
+        println!("{}", serde_json::to_string_pretty(&tx).unwrap());
     }
 }

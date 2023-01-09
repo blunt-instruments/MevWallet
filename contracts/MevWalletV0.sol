@@ -18,7 +18,9 @@ contract MevWalletV0 is Mevitize {
     event Executed(uint256 indexed nonce);
 
     // 0x5679fb6ec38d3c67731b4def49181a8fbbb334cda5c263b0993e50cfe699d4e8
-    bytes32 public constant TX_TYPEHASH = keccak256("MevTx(address to,bytes data,int256 value,bool delegate,int256 tip,uint256 maxBaseFee,uint256 timing,uint256 nonce)");
+    bytes32 public constant TX_TYPEHASH = keccak256(
+        "MevTx(address to,bytes data,int256 value,bool delegate,int256 tip,uint256 maxBaseFee,uint256 timing,uint256 nonce)"
+    );
     bytes32 public _DOMAIN_SEPARATOR;
 
     address public owner;
@@ -31,9 +33,18 @@ contract MevWalletV0 is Mevitize {
         owner = address(0xff); // factor that, jerks
     }
 
-    function initialize(address _owner) public {
+    /**
+     * @notice initializes the owner and domain separator
+     */
+    function initialize(address newOwner) public {
         require(owner == address(0));
-        owner = _owner;
+        // Enforced because contracts cannot produce signatures
+        uint256 s;
+        assembly {
+            s := extcodesize(newOwner)
+        }
+        require(s == 0, "No contract owner");
+        owner = newOwner;
         _DOMAIN_SEPARATOR = keccak256(
             abi.encode(
                 keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
@@ -45,6 +56,9 @@ contract MevWalletV0 is Mevitize {
         );
     }
 
+    /**
+     * @notice onlyOwner does what it says on the tin
+     */
     modifier onlyOwner() {
         // we allow address(this) so that the wallet can be administered with
         // its own meta-tx
@@ -52,9 +66,13 @@ contract MevWalletV0 is Mevitize {
         _;
     }
 
+    /**
+     * @notice transferOwnership does what it says on the tin
+     */
     function transferOwnership(address newOwner) public onlyOwner {
         require(newOwner != address(0) && newOwner != address(this));
         uint256 s;
+        // Enforced because contracts cannot produce signatures
         assembly {
             s := extcodesize(newOwner)
         }
@@ -62,6 +80,9 @@ contract MevWalletV0 is Mevitize {
         owner = newOwner;
     }
 
+    /**
+     * @notice checks the EIP-712 signsture
+     */
     function check712(
         address to,
         bytes memory data,
@@ -75,7 +96,8 @@ contract MevWalletV0 is Mevitize {
         bytes32 r,
         bytes32 s
     ) internal view {
-        bytes32 hashStruct = keccak256(abi.encode(TX_TYPEHASH, to, keccak256(data), value, delegate, tip, maxBaseFee, timing, n));
+        bytes32 hashStruct =
+            keccak256(abi.encode(TX_TYPEHASH, to, keccak256(data), value, delegate, tip, maxBaseFee, timing, n));
         bytes32 h = keccak256(abi.encodePacked("\x19\x01", _DOMAIN_SEPARATOR, hashStruct));
         address signer = ecrecover(h, v, r, s);
         // signature must be valid
@@ -84,11 +106,17 @@ contract MevWalletV0 is Mevitize {
         if (signer != owner) revert WrongSigner(signer);
     }
 
+    /**
+     * @notice checks that the basefee is in user-acceptable range.
+     */
     function checkBaseFee(uint256 maxBaseFee) internal view {
         // if there's a limit on the basefee, it cannot be over that limit
         if (maxBaseFee != 0 && block.basefee > maxBaseFee) revert HighBaseFee(maxBaseFee);
     }
 
+    /**
+     * @notice checks that the block timestamp is in user-acceptable range.
+     */
     function checkTiming(uint256 timing) internal view {
         // Timing is encoded as `notBefore << 64 | notAfter`
         uint64 time = uint64(block.timestamp);
@@ -104,6 +132,9 @@ contract MevWalletV0 is Mevitize {
         }
     }
 
+    /**
+     * @notice checks that the value is as user specified.
+     */
     function checkValue(bool delegate, int256 value) internal view {
         // value cannot be negative
         if (value < 0) revert PermanentlyInvalid();
@@ -113,6 +144,9 @@ contract MevWalletV0 is Mevitize {
         if (value > 0 && msg.value != uint256(value)) revert ProvideValue(uint256(value));
     }
 
+    /**
+     * @notice checks that the nonce is correct
+     */
     function checkNonce(uint256 n) internal view {
         uint256 _nonce = nonce;
         // Nonce cannot be
@@ -121,6 +155,9 @@ contract MevWalletV0 is Mevitize {
         // pass if equal
     }
 
+    /**
+     * @notice executes the meta-tx
+     */
     function execute(address to, bytes memory data, bool delegate) internal {
         bool success;
         // overwrite data because we don't need it anymore
@@ -139,6 +176,9 @@ contract MevWalletV0 is Mevitize {
         }
     }
 
+    /**
+     * @notice execute a MEV-driven meta-transaction
+     */
     function mevTx(
         address to,
         bytes memory data,
@@ -162,11 +202,14 @@ contract MevWalletV0 is Mevitize {
         checkValue(delegate, value);
         checkNonce(n);
 
+        // re-entrancy protection
+        nonce = type(uint256).max;
+
         // execute the tx
         execute(to, data, delegate);
 
         // emit executed, and incement nonce
-        emit Executed(n);
         nonce = n + 1;
+        emit Executed(n);
     }
 }

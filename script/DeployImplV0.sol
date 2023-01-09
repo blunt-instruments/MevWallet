@@ -6,10 +6,9 @@ import "forge-std/Script.sol";
 import {MevWalletV0} from "../contracts/MevWalletV0.sol";
 
 contract DeployImplV0 is Script {
-
-    // produces 5 leading 6 total
-    // 0x0000000000682f8e82d3B3b37200C830E86D2Ef9
-    bytes32 constant salt = 0x13061f1c1bbc52beabac07a60520c45cf18845c92906e4b57c40260bf9ec1676;
+    // 5 leading 5 total
+    // 0x00000000007Dcbd85Fc67915ad4bE7DAE266e268
+    bytes32 constant salt = 0x13061f1c1bbc52beabac07a60520c45cf18845c93d3e19d8273d48c0755820ca;
 
     event h(bytes32);
 
@@ -18,5 +17,6 @@ contract DeployImplV0 is Script {
     function run() public {
         vm.broadcast();
         new MevWalletV0{salt: salt}();
+        emit h(keccak256(type(MevWalletV0).creationCode));
     }
 }
