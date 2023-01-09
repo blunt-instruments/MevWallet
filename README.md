@@ -3,6 +3,9 @@
 MevWallet is a smart contract wallet that allows the user to capture MEV from
 Searchers, or create MEV on purpose.
 
+This repo contains the solidity contracts in `contracts/`, deployment tooling
+in `script/`, and a Rust library for interacting with the contracts in `src/`.
+
 ### Wait what?
 
 MevWallet is a smart contract wallet that allows the user to capture MEV from
@@ -139,3 +142,20 @@ the anvil instance when necessary.
 
 It is NOT RECOMMENDED that you make contract changes. If you must, make sure to
 run `./bind.sh` to generate the rust bindings.
+
+### Deploying MevWallet
+
+If working on chain with a `MevWeth` deployment, use these scripts (including your RPC and signer details):
+
+```sh
+# deploy the implementation to a new chain
+forge script DeployImplV0
+# deploy the proxy factory to a new chain
+forge script DeployFactoryV0
+# deploy a new proxy wallet
+forge script DeployProxyV0.sol --sig "run(bytes32)" $YOUR_SALT_BYTES32
+```
+
+If working on a fresh anvil instance or a chain without `MevWeth`, follow the
+[MevWeth deployment instructions.](https://github.com/blunt-instruments/MevWeth#i-want-mevweth-on-my-chain)
+Then deploy MevWallet as above :)
