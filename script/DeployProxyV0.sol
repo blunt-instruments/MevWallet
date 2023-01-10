@@ -6,7 +6,7 @@ import {MevWalletV0Factory} from "../contracts/MevWalletV0Factory.sol";
 
 contract DeployProxyV0 is Script {
     // TODO: fix
-    MevWalletV0Factory factory = MevWalletV0Factory(0x385D9e104941e53fa73BBa3Ec3e9bAA4D1C5ad39);
+    MevWalletV0Factory factory = MevWalletV0Factory(0x444544a54b5193Ba6D1A3Cf9c83Ee12422b6A824);
 
     event proxy(address);
 

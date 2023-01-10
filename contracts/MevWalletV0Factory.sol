@@ -15,8 +15,8 @@ contract MevWalletV0Factory {
         address p;
         assembly {
             let buf := mload(0x40)
-            mstore(buf, 0x3d602880600a3d3981f3363d3d373d3d3d363d6e7Dcbd85Fc67915ad4bE7DAE2)
-            mstore(add(buf, 0x20), 0x66e2685af43d82803e903d91602657fd5bf30000000000000000000000000000)
+            mstore(buf, 0x3d602880600a3d3981f3363d3d373d3d3d363d6e8EaBBE9A46Fa87F0d1e41e62)
+            mstore(add(buf, 0x20), 0xA96d505af43d82803e903d91602657fd5bf30000000000000000000000000000)
 
             p := create2(0, buf, 0x32, salt)
         }
@@ -36,5 +36,7 @@ contract MevWalletV0Factory {
 }
 
 // 3d602d80600a3d3981f3363d3d373d3d3d363d
-// 6e 7Dcbd85Fc67915ad4bE7DAE266e268
+// 6e 7Dcbd85Fc67915ad4bE7DAE2 66e268
+// 6e 8EaBBE9A46Fa87F0d1e41e62 A96d50
 // 5af43d82803e903d91602b57fd5bf3
+

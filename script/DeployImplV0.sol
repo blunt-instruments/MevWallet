@@ -7,8 +7,8 @@ import {MevWalletV0} from "../contracts/MevWalletV0.sol";
 
 contract DeployImplV0 is Script {
     // 5 leading 5 total
-    // 0x00000000007Dcbd85Fc67915ad4bE7DAE266e268
-    bytes32 constant salt = 0x13061f1c1bbc52beabac07a60520c45cf18845c93d3e19d8273d48c0755820ca;
+    // 0x00000000008EaBBE9A46Fa87F0d1e41e62A96d50
+    bytes32 constant salt = 0x13061f1c1bbc52beabac07a60520c45cf18845c9b76fc1e181df83404270a4da;
 
     event h(bytes32);
 

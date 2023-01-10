@@ -34,8 +34,8 @@ end up paying **less than 0** tx fees (coooler!).
 ### Addresses
 
 - MevWeth: `0x00000000008C43efC014746c230049e330039Cb3`
-- MevWalletV0 Implementation: `0x00000000007Dcbd85Fc67915ad4bE7DAE266e268`
-- MevWalletV0 ProxyFactory: `0x385D9e104941e53fa73BBa3Ec3e9bAA4D1C5ad39`
+- MevWalletV0 Implementation: `0x00000000008EaBBE9A46Fa87F0d1e41e62A96d50`
+- MevWalletV0 ProxyFactory: `0x444544a54b5193Ba6D1A3Cf9c83Ee12422b6A824`
 
 Didn't bother to grind an address for the proxy factory :)
 

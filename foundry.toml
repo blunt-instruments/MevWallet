@@ -4,6 +4,6 @@ out = 'out'
 libs = ['lib']
 via-ir = true
 optimizer = true
-optimizer_runs = 999_999_999
+optimizer_runs = 1_000_000 # etherscan max
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config
