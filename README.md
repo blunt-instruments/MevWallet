@@ -50,7 +50,7 @@ Use `MevTxBuilder` to build a txn:
 let mev_tx: MevTx = MevTxBuilder::new()
   .to(weth_address)
   .call(
-    // WOW! you can use any ABI-gen generated call here!
+    // WOW! you can use any `abigen!` generated call here!
     // (you can also you `.data(some_bytes)` to set the raw calldata
     ierc20::TransferCall {
       recipient,
