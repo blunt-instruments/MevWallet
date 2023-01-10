@@ -6,6 +6,8 @@ Searchers, or create MEV on purpose.
 This repo contains the solidity contracts in `contracts/`, deployment tooling
 in `script/`, and a Rust library for interacting with the contracts in `src/`.
 
+THIS IS UNAUDITED CODE. USE AT YOUR OWN RISK
+
 ### Wait what?
 
 MevWallet is a smart contract wallet that allows the user to capture MEV from
