@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
-import {MevWalletV0} from "../contracts/MevWalletV0.sol";
+import {MevWalletV0} from "../contracts/V0/MevWalletV0.sol";
 
 contract MevWalletTest is Test {
     MevWalletV0 mtx;

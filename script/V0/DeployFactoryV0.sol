@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import "forge-std/Script.sol";
 
-import {MevWalletV0Factory} from "../contracts/MevWalletV0Factory.sol";
+import {MevWalletV0Factory} from "../../contracts/V0/MevWalletV0Factory.sol";
 
 contract DeployFactoryV0 is Script {
     bytes32 constant salt = keccak256("MevWalletFactory");

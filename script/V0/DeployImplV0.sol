@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import "forge-std/Script.sol";
 
-import {MevWalletV0} from "../contracts/MevWalletV0.sol";
+import {MevWalletV0} from "../../contracts/V0/MevWalletV0.sol";
 
 contract DeployImplV0 is Script {
     // 5 leading 5 total
