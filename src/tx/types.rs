@@ -178,6 +178,9 @@ impl SignedMevTx {
             .value(value.into_raw());
 
         let req = call.tx.as_eip1559_mut().expect("no legacy tx");
+        if !self.tx.max_base_fee.is_zero() {
+            req.max_fee_per_gas = Some(self.tx.max_base_fee);
+        }
         req.max_priority_fee_per_gas = Some(U256::zero());
 
         call

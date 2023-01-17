@@ -1,5 +1,6 @@
 use ethers::{abi::AbiEncode, prelude::*};
 use mev_wallet::{MevTxBuilder, MevWalletV0, MEV_WETH_ADDR, TX_TYPEHASH};
+use std::sync::Arc;
 
 abigen!(
     IERC20,
@@ -9,7 +10,6 @@ abigen!(
     ]"#,
 );
 
-use std::sync::Arc;
 
 static PROVIDER: Lazy<Arc<Provider<Http>>> =
     Lazy::new(|| Arc::new(Provider::new("http://127.0.0.1:8545".parse().unwrap())));
