@@ -18,23 +18,25 @@ pub mod mevitize {
     use std::sync::Arc;
     # [rustfmt :: skip] const __ABI : & str = "[{\"inputs\":[],\"type\":\"error\",\"name\":\"ExactBaseFee\",\"outputs\":[]}]" ;
     #[doc = r" The parsed JSON-ABI of the contract."]
-    pub static MEVITIZE_ABI: ethers::contract::Lazy<ethers::core::abi::Abi> =
-        ethers::contract::Lazy::new(|| {
-            ethers::core::utils::__serde_json::from_str(__ABI).expect("invalid abi")
+    pub static MEVITIZE_ABI: ::ethers::contract::Lazy<::ethers::core::abi::Abi> =
+        ::ethers::contract::Lazy::new(|| {
+            ::ethers::core::utils::__serde_json::from_str(__ABI).expect("invalid abi")
         });
     #[doc = r" Bytecode of the #name contract"]
-    pub static MEVITIZE_BYTECODE: ethers::contract::Lazy<ethers::core::types::Bytes> =
-        ethers::contract::Lazy::new(|| {
-            "0x60808060405234601357603a908160198239f35b600080fdfe600080fdfea2646970667358221220cccaeda4f1b114b321fee5be5414f1bba2549a047266c43de879147170fe200264736f6c63430008110033" . parse () . expect ("invalid bytecode")
+    pub static MEVITIZE_BYTECODE: ::ethers::contract::Lazy<::ethers::core::types::Bytes> =
+        ::ethers::contract::Lazy::new(|| {
+            "0x608080604052346013576011908160198239f35b600080fdfe600080fdfea164736f6c6343000811000a"
+                .parse()
+                .expect("invalid bytecode")
         });
-    pub struct Mevitize<M>(ethers::contract::Contract<M>);
+    pub struct Mevitize<M>(::ethers::contract::Contract<M>);
     impl<M> Clone for Mevitize<M> {
         fn clone(&self) -> Self {
             Mevitize(self.0.clone())
         }
     }
     impl<M> std::ops::Deref for Mevitize<M> {
-        type Target = ethers::contract::Contract<M>;
+        type Target = ::ethers::contract::Contract<M>;
         fn deref(&self) -> &Self::Target {
             &self.0
         }
@@ -46,15 +48,15 @@ pub mod mevitize {
                 .finish()
         }
     }
-    impl<M: ethers::providers::Middleware> Mevitize<M> {
+    impl<M: ::ethers::providers::Middleware> Mevitize<M> {
         #[doc = r" Creates a new contract instance with the specified `ethers`"]
         #[doc = r" client at the given `Address`. The contract derefs to a `ethers::Contract`"]
         #[doc = r" object"]
-        pub fn new<T: Into<ethers::core::types::Address>>(
+        pub fn new<T: Into<::ethers::core::types::Address>>(
             address: T,
             client: ::std::sync::Arc<M>,
         ) -> Self {
-            ethers::contract::Contract::new(address.into(), MEVITIZE_ABI.clone(), client).into()
+            ::ethers::contract::Contract::new(address.into(), MEVITIZE_ABI.clone(), client).into()
         }
         #[doc = r" Constructs the general purpose `Deployer` instance based on the provided constructor arguments and sends it."]
         #[doc = r" Returns a new instance of a deployer that returns an instance of this contract after sending the transaction"]
@@ -79,25 +81,25 @@ pub mod mevitize {
         #[doc = r"    let msg = greeter_contract.greet().call().await.unwrap();"]
         #[doc = r" # }"]
         #[doc = r" ```"]
-        pub fn deploy<T: ethers::core::abi::Tokenize>(
+        pub fn deploy<T: ::ethers::core::abi::Tokenize>(
             client: ::std::sync::Arc<M>,
             constructor_args: T,
         ) -> ::std::result::Result<
-            ethers::contract::builders::ContractDeployer<M, Self>,
-            ethers::contract::ContractError<M>,
+            ::ethers::contract::builders::ContractDeployer<M, Self>,
+            ::ethers::contract::ContractError<M>,
         > {
-            let factory = ethers::contract::ContractFactory::new(
+            let factory = ::ethers::contract::ContractFactory::new(
                 MEVITIZE_ABI.clone(),
                 MEVITIZE_BYTECODE.clone().into(),
                 client,
             );
             let deployer = factory.deploy(constructor_args)?;
-            let deployer = ethers::contract::ContractDeployer::new(deployer);
+            let deployer = ::ethers::contract::ContractDeployer::new(deployer);
             Ok(deployer)
         }
     }
-    impl<M: ethers::providers::Middleware> From<ethers::contract::Contract<M>> for Mevitize<M> {
-        fn from(contract: ethers::contract::Contract<M>) -> Self {
+    impl<M: ::ethers::providers::Middleware> From<::ethers::contract::Contract<M>> for Mevitize<M> {
+        fn from(contract: ::ethers::contract::Contract<M>) -> Self {
             Self(contract)
         }
     }
@@ -108,8 +110,8 @@ pub mod mevitize {
         Default,
         Eq,
         PartialEq,
-        ethers :: contract :: EthError,
-        ethers :: contract :: EthDisplay,
+        :: ethers :: contract :: EthError,
+        :: ethers :: contract :: EthDisplay,
     )]
     #[etherror(name = "ExactBaseFee", abi = "ExactBaseFee()")]
     pub struct ExactBaseFee;

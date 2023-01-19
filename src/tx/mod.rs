@@ -8,7 +8,7 @@ pub use builder::*;
 pub use types::*;
 
 use crate::{
-    bindings::mev_wallet_v0_factory::MevWalletV0Factory, MevWalletV0, MEV_WALLET_PROXY_FACTORY_ADDR,
+    bindings::mev_wallet_v0_factory::MevWalletV0Factory, MevWalletV1, MEV_WALLET_PROXY_FACTORY_ADDR,
 };
 use ethers::{
     prelude::{builders::ContractCall, ContractError},
@@ -41,7 +41,10 @@ where
     factory.create_wallet_with_owner(salt.into(), owner.into())
 }
 
-impl<M: ethers::providers::Middleware> crate::MevWalletV0<M> {
+impl<M> crate::MevWalletV1<M>
+where
+    M: Middleware + 'static,
+{
     /// Deploy a new proxy wallet
     /// Returns a new contract once deployment has succeeded
     pub async fn new_proxy(
@@ -65,7 +68,7 @@ impl<M: ethers::providers::Middleware> crate::MevWalletV0<M> {
                 ProviderError::CustomError("Could not get deploy tx receipt".to_owned()),
             )));
         }
-        Ok(MevWalletV0::new(address, client))
+        Ok(MevWalletV1::new(address, client))
     }
 
     /// Deploy a new proxy wallet with a specified owner
@@ -92,7 +95,7 @@ impl<M: ethers::providers::Middleware> crate::MevWalletV0<M> {
                 ProviderError::CustomError("Could not get deploy tx receipt".to_owned()),
             )));
         }
-        Ok(MevWalletV0::new(address, client))
+        Ok(MevWalletV1::new(address, client))
     }
 
     /// Create a [`MevTxBuilder`] from an ethers `TypedTransaction`. This
@@ -101,8 +104,8 @@ impl<M: ethers::providers::Middleware> crate::MevWalletV0<M> {
     pub async fn convert_tx(
         &self,
         typed_tx: &ethers::types::transaction::eip2718::TypedTransaction,
-    ) -> Result<MevTxBuilder, BuilderError> {
-        MevTxBuilder::from_typed_tx(&self.client(), typed_tx).await
+    ) -> Result<MevTxBuilderInternal<MevWalletV1<M>>, BuilderError> {
+        MevTxBuilderInternal::from_typed_tx(self, typed_tx).await
     }
 
     /// Create a contract call object sending the signed mev transaction

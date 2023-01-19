@@ -12,7 +12,7 @@ use ethers::{
     utils::keccak256,
 };
 
-use crate::MevWalletV0;
+use crate::MevWalletV1;
 
 /// A MEV-driven Meta-transaction. MEV Transactions are intended to be used
 /// with a [`MevWalletV0`] smart contract. They describe a transaction initiated
@@ -25,6 +25,8 @@ use crate::MevWalletV0;
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MevTx {
+    /// Address of the wallet from which this will be sent
+    pub wallet: Address,
     /// Target
     pub to: Address,
     /// Data
@@ -119,21 +121,16 @@ impl MevTx {
     }
 
     /// Sign the MEV transaction with the provided signer.
-    pub async fn sign<S: Signer>(
-        self,
-        wallet: Address,
-        signer: &S,
-    ) -> Result<SignedMevTx, S::Error> {
+    pub async fn sign<S: Signer>(self, signer: &S) -> Result<SignedMevTx, S::Error> {
         let chain_id = signer.chain_id();
         let eip712 = MevTx712 {
-            wallet,
+            wallet: self.wallet,
             chain_id,
             tx: &self,
         };
         let sig = signer.sign_typed_data(&eip712).await?;
         Ok(SignedMevTx {
             chain_id,
-            wallet,
             tx: self,
             sig,
         })
@@ -145,7 +142,6 @@ impl MevTx {
 #[serde(rename_all = "camelCase")]
 pub struct SignedMevTx {
     chain_id: u64,
-    wallet: Address,
     #[serde(flatten)]
     tx: MevTx,
     #[serde(flatten)]
@@ -155,7 +151,7 @@ pub struct SignedMevTx {
 impl SignedMevTx {
     /// Convert the Signed MEV tx into a call to the contract wallet
     pub fn into_call<M: Middleware>(self, middleware: Arc<M>) -> ContractCall<M, ()> {
-        let contract = MevWalletV0::new(self.wallet, middleware);
+        let contract = MevWalletV1::new(self.tx.wallet, middleware);
         let mut r = [0u8; 32];
         let mut s = [0u8; 32];
         self.sig.r.to_big_endian(&mut r);
@@ -193,7 +189,7 @@ impl SignedMevTx {
 
     /// Get the Wallet address
     pub fn wallet(&self) -> Address {
-        self.wallet
+        self.tx.wallet
     }
 
     /// Get the transaction details
@@ -214,8 +210,8 @@ mod test {
     fn it_generates_json_output() {
         let tx = SignedMevTx {
             chain_id: 31337,
-            wallet: Address::zero(),
             tx: MevTx {
+                wallet: Address::zero(),
                 to: Address::zero(),
                 data: "0x1234abcd".parse().unwrap(),
                 value: 500.into(),

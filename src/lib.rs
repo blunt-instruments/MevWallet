@@ -5,7 +5,7 @@
 /// Contract Bindings
 #[allow(missing_docs)]
 pub mod bindings;
-pub use bindings::mev_wallet_v0::MevWalletV0;
+pub use bindings::mev_wallet_v1::MevWalletV1;
 
 /// Mev Transaction creation and broadcast utils
 pub mod tx;
@@ -30,7 +30,7 @@ pub static MEV_WETH_ADDR: Lazy<H160> = Lazy::new(|| {
 
 /// MevWalletProxyFactory address
 pub static MEV_WALLET_PROXY_FACTORY_ADDR: Lazy<H160> = Lazy::new(|| {
-    "0x444544a54b5193Ba6D1A3Cf9c83Ee12422b6A824"
+    "0x49496DD21760ED9235aFE43871983869CC0eFC61"
         .parse()
         .unwrap()
 });

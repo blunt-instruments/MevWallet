@@ -140,9 +140,25 @@ contract MevWalletV1 is Mevitize {
         if (value < 0) revert PermanentlyInvalid();
         // delegate calls cannot have value
         if (delegate && value != 0) revert PermanentlyInvalid();
-        // msg.value must be 0, or within the contract's ability to provide
-        uint256 bal = address(this).balance;
-        if (uint256(value) > bal) revert ProvideValue(uint256(value) - bal);
+        unchecked {
+            // cast checked by previous if statement
+            uint256 val = uint256(value);
+            uint256 bal = address(this).balance;
+            uint256 msgVal = msg.value;
+            // becase bal cannot be less than msgval
+            uint256 preBal = bal - msgVal;
+            // if the value BEFORE getting the Searcher's input ETH was
+            // sufficient, don't allow input ETH. This prevents the Searcher
+            // from converting wallet MevWeth into ETH by providing extra value
+            if (preBal >= val && msgVal != 0) revert ProvideValue(0);
+            // if the value BEFORE getting the Searcher's input ETH was
+            // insufficient, require the msg has the exact value necessary
+            if (preBal < val) {
+                // checked by the if statement
+                uint256 deficit = val - preBal;
+                if (msgVal != deficit) revert ProvideValue(deficit);
+            }
+        }
     }
 
     /**
@@ -159,14 +175,13 @@ contract MevWalletV1 is Mevitize {
     /**
      * @notice executes the meta-tx
      */
-    function execute(address to, bytes memory data, bool delegate) internal {
+    function execute(address to, bytes memory data, uint256 value, bool delegate) internal {
         bool success;
         // overwrite data because we don't need it anymore
         if (delegate) {
             (success, data) = to.delegatecall(data);
         } else {
-            // safe to use msg.value as it has been checked in checkValue
-            (success, data) = to.call{value: msg.value}(data);
+            (success, data) = to.call{value: value}(data);
         }
         // okay this seems crazy but hear me out
         // MEV block builders already drop reverting txns.
@@ -207,7 +222,7 @@ contract MevWalletV1 is Mevitize {
         nonce = type(uint256).max;
 
         // execute the tx
-        execute(to, data, delegate);
+        execute(to, data, uint256(value), delegate);
 
         // emit executed, and incement nonce
         nonce = n + 1;

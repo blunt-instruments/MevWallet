@@ -29,14 +29,14 @@ cd ../..
 # mints 1000 MevWeth to the from
 cast send $RPC_ARG $FROM_ARG --value 1000ether $MEV_WETH > /dev/null
 
-forge script $RPC_ARG $SENDER_ARG --broadcast --unlocked DeployImplV0 -vvvvvv &> /dev/null
+forge script $RPC_ARG $SENDER_ARG --broadcast --unlocked DeployImplV1 -vvvvvv &> /dev/null
 
 sleep .2
 
-forge script $RPC_ARG $SENDER_ARG --broadcast --unlocked DeployFactoryV0 &> /dev/null
+forge script $RPC_ARG $SENDER_ARG --broadcast --unlocked DeployFactoryV1 &> /dev/null
 
 sleep .2
 
-forge script $RPC_ARG $SENDER_ARG --broadcast --unlocked DeployProxyV0 --sig "run(bytes32)" 0x5af43d82803e903d91602b57fd5bf30000000000000001189998819991197253 -vvvvvv &> /dev/null
+forge script $RPC_ARG $SENDER_ARG --broadcast --unlocked DeployProxyV1 --sig "run(bytes32)" 0x5af43d82803e903d91602b57fd5bf30000000000000001189998819991197253 -vvvvvv &> /dev/null
 
 wait

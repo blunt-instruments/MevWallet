@@ -1,5 +1,5 @@
 use ethers::{abi::AbiEncode, prelude::*};
-use mev_wallet::{MevTxBuilder, MevWalletV0, MEV_WETH_ADDR, TX_TYPEHASH};
+use mev_wallet::{MevTxBuilder, MevWalletV1, MEV_WETH_ADDR, TX_TYPEHASH};
 use std::sync::Arc;
 
 abigen!(
@@ -10,14 +10,13 @@ abigen!(
     ]"#,
 );
 
-
 static PROVIDER: Lazy<Arc<Provider<Http>>> =
     Lazy::new(|| Arc::new(Provider::new("http://127.0.0.1:8545".parse().unwrap())));
 
 static KEY: &str = "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 
 static WALLET_ADDR: Lazy<H160> = Lazy::new(|| {
-    "0x7c73380fefdc7857aa7791cefac0ae1afdea57e3"
+    "0x8eff6a210919460527d7eebd1a4b8639a281af0b"
         .parse()
         .unwrap()
 });
@@ -38,7 +37,7 @@ async fn it() {
     );
 
     let mev_weth = IERC20::new(*MEV_WETH_ADDR, SIGNER_MWARE.clone());
-    let wallet = MevWalletV0::new(*WALLET_ADDR, SIGNER_MWARE.clone());
+    let wallet = MevWalletV1::new(*WALLET_ADDR, SIGNER_MWARE.clone());
 
     assert_eq!(wallet.owner().await.unwrap(), SIGNER.address(),);
     assert_eq!(*TX_TYPEHASH, wallet.tx_typehash().call().await.unwrap());
@@ -59,6 +58,7 @@ async fn it() {
     }
 
     let tx = MevTxBuilder::default()
+        .wallet(&wallet)
         .data(
             TransferCall {
                 recipient: H160::default(),
@@ -71,18 +71,14 @@ async fn it() {
         .max_base_fee(U256::from(1230) * 1_000_000_000)
         .with_signer(SIGNER.clone())
         .chain_id(31337)
-        .populate(&wallet)
+        .populate()
         .await
         .unwrap();
 
     let again = tx.clone();
-    let tx = tx.build(wallet.address()).await.unwrap();
+    let tx = tx.build().await.unwrap();
 
-    let again = again
-        .nonce(tx.tx().nonce + 1)
-        .build(wallet.address())
-        .await
-        .unwrap();
+    let again = again.nonce(tx.tx().nonce + 1).build().await.unwrap();
 
     let call = wallet.send(tx);
     call.clone().await.unwrap();

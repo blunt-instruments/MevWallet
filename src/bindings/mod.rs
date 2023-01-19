@@ -5,9 +5,11 @@
 //! These files may be overwritten by the codegen system at any time.
 pub mod deploy_factory_v0;
 pub mod deploy_impl_v0;
-pub mod deploy_mev_wallet_v0;
+pub mod deploy_impl_v1;
+pub mod deploy_proxy_v0;
 pub mod i_mev_weth;
 pub mod mev_wallet_v0;
 pub mod mev_wallet_v0_factory;
+pub mod mev_wallet_v1;
 pub mod mevitize;
 pub mod std_chains;
