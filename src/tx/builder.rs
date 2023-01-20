@@ -31,6 +31,7 @@ pub type SignedMevTxBuilder<S> = SignedMevTxBuilderInternal<(), S>;
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct MevTxBuilderInternal<M> {
     wallet: Option<M>,
+    chain_id: Option<u64>,
     to: Option<Address>,
     data: Option<Bytes>,
     value: Option<I256>,
@@ -46,6 +47,7 @@ pub struct MevTxBuilderInternal<M> {
 impl Default for MevTxBuilder {
     fn default() -> Self {
         Self {
+            chain_id: Default::default(),
             wallet: Default::default(),
             to: Default::default(),
             data: Default::default(),
@@ -91,6 +93,7 @@ impl<C> MevTxBuilderInternal<C> {
         M: Middleware + 'static,
     {
         MevTxBuilderInternal {
+            chain_id: self.chain_id,
             wallet: Some(contract.clone()),
             to: self.to,
             data: self.data,
@@ -174,6 +177,13 @@ impl<C> MevTxBuilderInternal<C> {
             builder: self,
             signer,
         }
+    }
+
+    /// Set the chain_id explicitly. If this is not called, it will be signed
+    /// with the signer's current chain ID.
+    pub fn chain_id(mut self, chain_id: u64) -> Self {
+        self.chain_id = Some(chain_id);
+        self
     }
 
     /// Return the list of mandatory keys that are not yet set.
@@ -310,6 +320,7 @@ where
         let timing = self.not_before.unwrap_or_default() << 64 | self.deadline.unwrap_or_default();
 
         Ok(MevTx {
+            chain_id: self.chain_id.unwrap_or(1),
             wallet: self.wallet.expect("checked by missing_keys").address(),
             to: self.to.expect("checked by missing_keys"),
             data: self.data.unwrap_or_default(),
@@ -407,7 +418,6 @@ where
 
     /// Replace the signer
     pub fn with_signer<T: Signer>(self, signer: T) -> SignedMevTxBuilderInternal<M, T> {
-        let signer = signer.with_chain_id(self.signer.chain_id());
         self.builder.with_signer(signer)
     }
 
@@ -419,7 +429,7 @@ where
     /// Set the chain_id explicitly. If this is not called, it will be signed
     /// with the signer's current chain ID.
     pub fn chain_id(mut self, chain_id: u64) -> Self {
-        self.signer = self.signer.with_chain_id(chain_id);
+        self.builder = self.builder.chain_id(chain_id);
         self
     }
 }
@@ -472,7 +482,9 @@ where
     /// Build and sign the transaction
     pub async fn build(self) -> Result<SignedMevTx, BuilderError> {
         let tx = self.builder.build()?;
-        tx.sign(&self.signer)
+        let signer = self.signer.with_chain_id(tx.chain_id);
+
+        tx.sign(&signer)
             .await
             .map_err(|e| format!("{}", e))
             .map_err(BuilderError::Custom)

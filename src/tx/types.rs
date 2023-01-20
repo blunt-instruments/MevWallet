@@ -1,18 +1,21 @@
 use std::{convert::Infallible, sync::Arc};
 
 use ethers::{
-    abi::Tokenize,
+    abi::{AbiEncode, Tokenize},
     prelude::{builders::ContractCall, Address, Bytes, Signature, U256},
     providers::Middleware,
     signers::Signer,
     types::{
-        transaction::eip712::{EIP712Domain, Eip712},
-        H256, I256,
+        transaction::{
+            eip2718::TypedTransaction,
+            eip712::{EIP712Domain, Eip712},
+        },
+        Eip1559TransactionRequest, H256, I256,
     },
     utils::keccak256,
 };
 
-use crate::MevWalletV1;
+use crate::{bindings::mev_wallet_v0::MevTxCall, MevWalletV1};
 
 /// A MEV-driven Meta-transaction. MEV Transactions are intended to be used
 /// with a [`MevWalletV0`] smart contract. They describe a transaction initiated
@@ -25,6 +28,8 @@ use crate::MevWalletV1;
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MevTx {
+    /// The chain id on which the wallet is deployed
+    pub chain_id: u64,
     /// Address of the wallet from which this will be sent
     pub wallet: Address,
     /// Target
@@ -121,19 +126,16 @@ impl MevTx {
     }
 
     /// Sign the MEV transaction with the provided signer.
-    pub async fn sign<S: Signer>(self, signer: &S) -> Result<SignedMevTx, S::Error> {
+    pub async fn sign<S: Signer>(mut self, signer: &S) -> Result<SignedMevTx, S::Error> {
         let chain_id = signer.chain_id();
+        self.chain_id = chain_id;
         let eip712 = MevTx712 {
             wallet: self.wallet,
             chain_id,
             tx: &self,
         };
         let sig = signer.sign_typed_data(&eip712).await?;
-        Ok(SignedMevTx {
-            chain_id,
-            tx: self,
-            sig,
-        })
+        Ok(SignedMevTx { tx: self, sig })
     }
 }
 
@@ -141,7 +143,6 @@ impl MevTx {
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SignedMevTx {
-    chain_id: u64,
     #[serde(flatten)]
     tx: MevTx,
     #[serde(flatten)]
@@ -149,6 +150,43 @@ pub struct SignedMevTx {
 }
 
 impl SignedMevTx {
+    /// Convert into a populated TypedTransaction, ready for population and
+    /// dispatch
+    pub fn wrap_in_tx(self) -> TypedTransaction {
+        let mut r = [0u8; 32];
+        let mut s = [0u8; 32];
+        self.sig.r.to_big_endian(&mut r);
+        self.sig.s.to_big_endian(&mut s);
+
+        let data = MevTxCall {
+            to: self.tx.to,
+            data: self.tx.data,
+            value: self.tx.value,
+            delegate: self.tx.delegate,
+            tip: self.tx.tip,
+            max_base_fee: self.tx.max_base_fee,
+            timing: self.tx.timing,
+            n: self.tx.nonce,
+            v: self.sig.v as u8,
+            r,
+            s,
+        }
+        .encode();
+
+        TypedTransaction::Eip1559(Eip1559TransactionRequest {
+            from: None,
+            to: Some(self.tx.wallet.into()),
+            gas: None,
+            value: None,
+            data: Some(data.into()),
+            nonce: None,
+            access_list: Default::default(),
+            max_priority_fee_per_gas: Some(U256::zero()),
+            max_fee_per_gas: None,
+            chain_id: Some(self.tx.chain_id.into()),
+        })
+    }
+
     /// Convert the Signed MEV tx into a call to the contract wallet
     pub fn into_call<M: Middleware>(self, middleware: Arc<M>) -> ContractCall<M, ()> {
         let contract = MevWalletV1::new(self.tx.wallet, middleware);
@@ -156,22 +194,20 @@ impl SignedMevTx {
         let mut s = [0u8; 32];
         self.sig.r.to_big_endian(&mut r);
         self.sig.s.to_big_endian(&mut s);
-        let value = self.tx.value;
-        let mut call = contract
-            .mev_tx(
-                self.tx.to,
-                self.tx.data,
-                self.tx.value,
-                self.tx.delegate,
-                self.tx.tip,
-                self.tx.max_base_fee,
-                self.tx.timing,
-                self.tx.nonce,
-                self.sig.v as u8,
-                r,
-                s,
-            )
-            .value(value.into_raw());
+
+        let mut call = contract.mev_tx(
+            self.tx.to,
+            self.tx.data,
+            self.tx.value,
+            self.tx.delegate,
+            self.tx.tip,
+            self.tx.max_base_fee,
+            self.tx.timing,
+            self.tx.nonce,
+            self.sig.v as u8,
+            r,
+            s,
+        );
 
         let req = call.tx.as_eip1559_mut().expect("no legacy tx");
         if !self.tx.max_base_fee.is_zero() {
@@ -184,7 +220,7 @@ impl SignedMevTx {
 
     /// Get the chain ID
     pub fn chain_id(&self) -> u64 {
-        self.chain_id
+        self.tx.chain_id
     }
 
     /// Get the Wallet address
@@ -209,8 +245,8 @@ mod test {
     #[test]
     fn it_generates_json_output() {
         let tx = SignedMevTx {
-            chain_id: 31337,
             tx: MevTx {
+                chain_id: 31337,
                 wallet: Address::zero(),
                 to: Address::zero(),
                 data: "0x1234abcd".parse().unwrap(),

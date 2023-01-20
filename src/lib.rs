@@ -11,6 +11,9 @@ pub use bindings::mev_wallet_v1::MevWalletV1;
 pub mod tx;
 pub use crate::tx::{MevTx, MevTxBuilder, SignedMevTx};
 
+/// Tooling for deploying new MevWallet proxies
+pub mod deploy;
+
 use ethers::types::H160;
 use once_cell::sync::Lazy;
 
@@ -29,11 +32,7 @@ pub static MEV_WETH_ADDR: Lazy<H160> = Lazy::new(|| {
 });
 
 /// MevWalletProxyFactory address
-pub static MEV_WALLET_PROXY_FACTORY_ADDR: Lazy<H160> = Lazy::new(|| {
-    "0x49496DD21760ED9235aFE43871983869CC0eFC61"
-        .parse()
-        .unwrap()
-});
+pub static MEV_WALLET_PROXY_FACTORY_ADDR: Lazy<H160> = Lazy::new(|| "".parse().unwrap());
 
 #[cfg(test)]
 mod test {
