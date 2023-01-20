@@ -116,7 +116,24 @@ contract MevWalletTest is Test {
 
         getMev();
         assertGe(weth.balanceOf(searcher), tip);
+    }
 
+    function test_sendEthMixedVallue() public {
+        uint256 startBal = 0.2 ether;
+        vm.deal(address(mtx), startBal);
 
+        uint256 toSend = 0.5 ether;
+        uint256 tip = 500 gwei;
+
+        bytes memory t = buildMevTx(friend, "", int256(toSend), int256(tip));
+        sendMevTx(t, toSend - startBal);
+
+        emit log_uint(friend.balance);
+
+        assertEq(friend.balance, toSend, "friend recieved");
+        assertGe(mev.mev(), tip, "mev amnt");
+
+        getMev();
+        assertGe(weth.balanceOf(searcher), tip + toSend - startBal);
     }
 }

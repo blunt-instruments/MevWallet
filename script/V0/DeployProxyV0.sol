@@ -10,7 +10,7 @@ contract DeployProxyV0 is Script {
 
     event proxy(address);
 
-    function run(bytes32 /*salt*/) public pure {
+    function run(bytes32 /*salt*/ ) public pure {
         revert("MevWalletV0 use not recommended");
         // vm.broadcast();
         // emit proxy(factory.createWallet(salt));
