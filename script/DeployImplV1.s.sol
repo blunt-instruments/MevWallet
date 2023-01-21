@@ -6,8 +6,8 @@ import "forge-std/Script.sol";
 import {MevWalletV1} from "../contracts/MevWalletV1.sol";
 
 contract DeployImplV1 is Script {
-    // 0x00000000004096437C84E1B0927D5ED44F45F6b3
-    bytes32 constant salt = 0x13061f1c1bbc52beabac07a60520c45cf18845c95a4b8b4292b718e26456d249;
+    // 0x0000000000c08718718B974D644B098C19bd0064
+    bytes32 constant salt = 0x13061f1c1bbc52beabac07a60520c45cf18845c97844375d0e2d4023552cf4ac;
 
     event h(bytes32);
 

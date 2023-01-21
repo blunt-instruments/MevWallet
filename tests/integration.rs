@@ -16,7 +16,7 @@ static PROVIDER: Lazy<Arc<Provider<Http>>> =
 static KEY: &str = "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 
 static WALLET_ADDR: Lazy<H160> = Lazy::new(|| {
-    "0x8eff6a210919460527d7eebd1a4b8639a281af0b"
+    "0xf12cf18103fe766f2d1981ea5cf309cc37b04969"
         .parse()
         .unwrap()
 });

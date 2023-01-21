@@ -32,7 +32,11 @@ pub static MEV_WETH_ADDR: Lazy<H160> = Lazy::new(|| {
 });
 
 /// MevWalletProxyFactory address
-pub static MEV_WALLET_PROXY_FACTORY_ADDR: Lazy<H160> = Lazy::new(|| "".parse().unwrap());
+pub static MEV_WALLET_PROXY_FACTORY_ADDR: Lazy<H160> = Lazy::new(|| {
+    "0x9248B5e672e1880af34068C0FaE18D30c26D05Fb"
+        .parse()
+        .unwrap()
+});
 
 #[cfg(test)]
 mod test {
