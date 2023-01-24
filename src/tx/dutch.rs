@@ -4,7 +4,7 @@ use ethers::{
     types::{I256, U256},
 };
 
-use crate::{MevTx, MevWalletV1, SignedMevTx};
+use crate::{delegate_builder, delegate_builder_populate, MevTx, MevWalletV1, SignedMevTx};
 
 use super::{BuilderError, MevTxBuilderInternal, SignedMevTxBuilderInternal};
 
@@ -16,16 +16,12 @@ impl<T> EscalationPolicy for T where T: IntoIterator<Item = (U256, I256)> {}
 /// A tx builder that produces an ascending-tip MEV gas auction
 pub struct DutchBuilder<M, T> {
     /// Internal builder
-    builder: MevTxBuilderInternal<MevWalletV1<M>>,
+    builder: MevTxBuilderInternal<M>,
     /// Fee escalation policy
     policy: T,
 }
 
-impl<M, T> DutchBuilder<M, T>
-where
-    T: EscalationPolicy,
-    M: Middleware + 'static,
-{
+impl<M, T> DutchBuilder<M, T> {
     /// Add a signer to the builder
     pub fn with_signer<S: Signer>(self, signer: S) -> SignedDutchBuilder<M, T, S> {
         SignedDutchBuilder {
@@ -33,7 +29,13 @@ where
             policy: self.policy,
         }
     }
+}
 
+impl<M, T> DutchBuilder<MevWalletV1<M>, T>
+where
+    T: EscalationPolicy,
+    M: Middleware + 'static,
+{
     /// Build an array of transactions adjusting the tip according to the escalation policy
     pub fn build(self) -> Result<Vec<MevTx>, BuilderError> {
         let mut txns = vec![];
@@ -49,18 +51,22 @@ where
         Ok(txns)
     }
 }
+
+delegate_builder!(DutchBuilder<M, T>);
+delegate_builder_populate!(DutchBuilder<MevWalletV1<M>, T>);
+
 /// A Reverse-Dutch MEV auction transaction builder
 pub struct SignedDutchBuilder<M, T, S> {
     /// Internal builder
-    builder: SignedMevTxBuilderInternal<MevWalletV1<M>, S>,
+    builder: SignedMevTxBuilderInternal<M, S>,
     /// Fee escalation policy
     policy: T,
 }
 
-impl<M, T, S> SignedDutchBuilder<M, T, S>
+impl<M, T, S> SignedDutchBuilder<MevWalletV1<M>, T, S>
 where
     T: EscalationPolicy,
-    M: Middleware + 'static,
+    M: Middleware + 'static + Clone,
     S: Signer + Clone, // TODO: fix
 {
     /// Build the dutch auction and sign the txns
@@ -79,3 +85,6 @@ where
         Ok(txns)
     }
 }
+
+delegate_builder!(SignedDutchBuilder<M, T, S>);
+delegate_builder_populate!(SignedDutchBuilder<MevWalletV1<M>, T, S>);
