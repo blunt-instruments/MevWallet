@@ -4,11 +4,10 @@ macro_rules! delegate_builder {
     (
         $name:ident $(<
             // match one or more lifetimes separated by a comma
-            $( $lt:lifetime ),*
             $( $generic:tt ),+
         >)?
     ) => {
-        impl $(< $($lt),* $($generic),+ >)? $name $(< $($lt),* $($generic),+ >)? {
+        impl $(< $($generic),+ >)? $name $(< $($generic),+ >)? {
 
             /// Return the list of mandatory keys that are not yet set.
             pub fn missing_keys(&self) -> Vec<&'static str> {
@@ -88,19 +87,21 @@ macro_rules! delegate_builder_populate {
     (
         $name:ident $(<
             // match one or more lifetimes separated by a comma
-            $( $lt:lifetime ),*
+            $( $lt:lifetime, )*
             MevWalletV1<M>,
             $( $generic:tt ),*
         >)?
     ) => {
-        impl $(< $($lt),* M, $($generic),+ >)? $name $(< $($lt),* $crate::MevWalletV1<M>, $($generic),+ >)?
+        impl $(< $($lt,)* M, $($generic),+ >)? $name $(< $($lt,)* $crate::MevWalletV1<M>, $($generic),+ >)?
         where
             M: Middleware + 'static
         {
             /// Populate the nonce by querying the contract. Note that multiple calls
             /// will return the same nonce until the chain confirms a transaction. If
             /// building multiple offline txns, consider [`populate_nonce_with_offset`]
-            pub async fn populate_nonce(mut self) -> Result<Self, BuilderError>
+            pub async fn populate_nonce(mut self) -> Result<$name $(< $($lt,)* $crate::MevWalletV1<M>, $($generic),+ >)?, BuilderError>
+
+            // pub async fn populate_nonce(mut self) -> Result<Self, BuilderError>
             where
                 M: Middleware + 'static,
             {
@@ -110,7 +111,7 @@ macro_rules! delegate_builder_populate {
 
             /// Populate the nonce by querying the contract, then add `offset` to the
             /// result. Useful for making sequences of transactions.
-            pub async fn populate_nonce_with_offset(mut self, offset: u64) -> Result<Self, BuilderError>
+            pub async fn populate_nonce_with_offset(mut self, offset: u64) -> Result<$name $(< $($lt,)* $crate::MevWalletV1<M>, $($generic),+ >)?, BuilderError>
             where
                 M: Middleware + 'static,
             {
@@ -119,7 +120,7 @@ macro_rules! delegate_builder_populate {
             }
 
             /// Populate the max base fee using the chain's EIP1559 estimator
-            pub async fn populate_max_base_fee(mut self) -> Result<Self, BuilderError>
+            pub async fn populate_max_base_fee(mut self) -> Result<$name $(< $($lt,)* $crate::MevWalletV1<M>, $($generic),+ >)?, BuilderError>
             where
                 M: Middleware + 'static,
             {
@@ -129,7 +130,7 @@ macro_rules! delegate_builder_populate {
 
             /// Populate the transaction using the contract. Fills gas, nonce, and
             /// max_base_fee, if they are not already filled.
-            pub async fn populate(mut self) -> Result<Self, BuilderError>
+            pub async fn populate(mut self) -> Result<$name $(< $($lt,)* $crate::MevWalletV1<M>, $($generic),+ >)?, BuilderError>
             where
                 M: Middleware + 'static,
             {

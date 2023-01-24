@@ -23,7 +23,7 @@ pub struct DutchBuilder<M, T> {
 
 impl<M, T> DutchBuilder<M, T> {
     /// Add a signer to the builder
-    pub fn with_signer<S: Signer>(self, signer: S) -> SignedDutchBuilder<M, T, S> {
+    pub fn with_signer<S: Signer>(self, signer: &S) -> SignedDutchBuilder<M, T, S> {
         SignedDutchBuilder {
             builder: self.builder.with_signer(signer),
             policy: self.policy,
@@ -56,18 +56,18 @@ delegate_builder!(DutchBuilder<M, T>);
 delegate_builder_populate!(DutchBuilder<MevWalletV1<M>, T>);
 
 /// A Reverse-Dutch MEV auction transaction builder
-pub struct SignedDutchBuilder<M, T, S> {
+pub struct SignedDutchBuilder<'a, M, T, S> {
     /// Internal builder
-    builder: SignedMevTxBuilderInternal<M, S>,
+    builder: SignedMevTxBuilderInternal<'a, M, S>,
     /// Fee escalation policy
     policy: T,
 }
 
-impl<M, T, S> SignedDutchBuilder<MevWalletV1<M>, T, S>
+impl<'a, M, T, S> SignedDutchBuilder<'a, MevWalletV1<M>, T, S>
 where
     T: EscalationPolicy,
     M: Middleware + 'static + Clone,
-    S: Signer + Clone, // TODO: fix
+    S: Signer,
 {
     /// Build the dutch auction and sign the txns
     pub async fn build(self) -> Result<Vec<SignedMevTx>, BuilderError> {
@@ -86,5 +86,5 @@ where
     }
 }
 
-delegate_builder!(SignedDutchBuilder<M, T, S>);
-delegate_builder_populate!(SignedDutchBuilder<MevWalletV1<M>, T, S>);
+delegate_builder!(SignedDutchBuilder<'a, M, T, S>);
+delegate_builder_populate!(SignedDutchBuilder<'a, MevWalletV1<M>, T, S>);

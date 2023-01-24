@@ -5,7 +5,7 @@ use ethers::{
     types::{transaction::eip2718::TypedTransaction, Eip1559TransactionRequest, I256},
 };
 
-use crate::{MevTx, MevWalletV1, SignedMevTx};
+use crate::{delegate_builder, delegate_builder_populate, MevTx, MevWalletV1, SignedMevTx};
 
 /// Error type for [`MevTxBuilder`]
 #[derive(Debug, thiserror::Error)]
@@ -16,6 +16,14 @@ pub enum BuilderError {
     /// From wallet is not set.
     #[error("Missing Contract. Set `wallet()` on the builder")]
     MissingContract,
+    /// Signer has an unexpected chain id
+    #[error("Signer has an unexpected chain id. Tx has {tx}, signer has {signer}")]
+    ChainIdMismatch {
+        /// Transaction's chain id
+        tx: u64,
+        /// Signer's chain id
+        signer: u64,
+    },
     /// Custom error (e.g. signer)
     #[error("(0)")]
     Custom(String),
@@ -25,7 +33,7 @@ pub enum BuilderError {
 pub type MevTxBuilder = MevTxBuilderInternal<()>;
 
 /// The `SignedMevTxBuilder` builds MevTxns.
-pub type SignedMevTxBuilder<S> = SignedMevTxBuilderInternal<(), S>;
+pub type SignedMevTxBuilder<'a, S> = SignedMevTxBuilderInternal<'a, (), S>;
 
 /// A Builder for `MevTx`
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
@@ -172,7 +180,7 @@ impl<C> MevTxBuilderInternal<C> {
 
     /// Sign this [`MevTx`] with the specified signer. Converts into a
     /// [`SignedMevTxBuilder`], which has an `async fn build`
-    pub fn with_signer<S: Signer>(self, signer: S) -> SignedMevTxBuilderInternal<C, S> {
+    pub fn with_signer<S: Signer>(self, signer: &S) -> SignedMevTxBuilderInternal<C, S> {
         SignedMevTxBuilderInternal {
             builder: self,
             signer,
@@ -336,18 +344,29 @@ where
 
 /// A [`SignedMevTxBuilder`] builds [`SignedMevTx`]. It is created from a
 /// builder with a signer
-#[derive(Debug, Clone, serde::Serialize)]
-pub struct SignedMevTxBuilderInternal<M, S> {
-    #[serde(flatten)]
+#[derive(Debug, serde::Serialize)]
+
+pub struct SignedMevTxBuilderInternal<'a, M, S> {
     builder: MevTxBuilderInternal<M>,
-    #[serde(skip)]
-    signer: S,
+    signer: &'a S,
 }
 
-crate::delegate_builder!(SignedMevTxBuilderInternal<M, S>);
-crate::delegate_builder_populate!(SignedMevTxBuilderInternal<MevWalletV1<M>, S>);
+impl<'a, M, S> Clone for SignedMevTxBuilderInternal<'a, M, S>
+where
+    M: Clone,
+{
+    fn clone(&self) -> Self {
+        Self {
+            builder: self.builder.clone(),
+            signer: self.signer,
+        }
+    }
+}
 
-impl<M, S: Signer> SignedMevTxBuilderInternal<M, S>
+delegate_builder!(SignedMevTxBuilderInternal<'a, M, S>);
+delegate_builder_populate!(SignedMevTxBuilderInternal<'a, MevWalletV1<M>, S>);
+
+impl<'a, M, S: Signer> SignedMevTxBuilderInternal<'a, M, S>
 where
     S: Signer,
 {
@@ -355,7 +374,7 @@ where
     pub fn wallet<N>(
         self,
         contract: &MevWalletV1<N>,
-    ) -> SignedMevTxBuilderInternal<MevWalletV1<N>, S>
+    ) -> SignedMevTxBuilderInternal<'a, MevWalletV1<N>, S>
     where
         N: Middleware + 'static,
     {
@@ -366,12 +385,12 @@ where
     }
 
     /// Replace the signer
-    pub fn with_signer<T: Signer>(self, signer: T) -> SignedMevTxBuilderInternal<M, T> {
+    pub fn with_signer<T: Signer>(self, signer: &T) -> SignedMevTxBuilderInternal<M, T> {
         self.builder.with_signer(signer)
     }
 }
 
-impl<M, S> SignedMevTxBuilderInternal<MevWalletV1<M>, S>
+impl<'a, M, S> SignedMevTxBuilderInternal<'a, MevWalletV1<M>, S>
 where
     M: Middleware + 'static,
     S: Signer,
@@ -379,9 +398,15 @@ where
     /// Build and sign the transaction
     pub async fn build(self) -> Result<SignedMevTx, BuilderError> {
         let tx = self.builder.build()?;
-        let signer = self.signer.with_chain_id(tx.chain_id);
 
-        tx.sign(&signer)
+        if self.signer.chain_id() != tx.chain_id {
+            return Err(BuilderError::ChainIdMismatch {
+                tx: tx.chain_id,
+                signer: self.signer.chain_id(),
+            });
+        }
+
+        tx.sign(self.signer)
             .await
             .map_err(|e| format!("{}", e))
             .map_err(BuilderError::Custom)

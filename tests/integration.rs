@@ -69,7 +69,7 @@ async fn it() {
         .to(mev_weth.address())
         .tip(1_000_000_000)
         .max_base_fee(U256::from(1230) * 1_000_000_000)
-        .with_signer(SIGNER.clone())
+        .with_signer(&*SIGNER)
         .chain_id(31337)
         .populate()
         .await
