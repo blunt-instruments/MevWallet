@@ -36,11 +36,11 @@ async fn it() {
             .unwrap()
     );
 
-    let mev_weth = IERC20::new(*MEV_WETH_ADDR, SIGNER_MWARE.clone());
+    let mev_weth = IERC20::new(MEV_WETH_ADDR, SIGNER_MWARE.clone());
     let wallet = MevWalletV1::new(*WALLET_ADDR, SIGNER_MWARE.clone());
 
     assert_eq!(wallet.owner().await.unwrap(), SIGNER.address(),);
-    assert_eq!(*TX_TYPEHASH, wallet.tx_typehash().call().await.unwrap());
+    assert_eq!(TX_TYPEHASH, wallet.tx_typehash().call().await.unwrap());
 
     if mev_weth
         .balance_of(wallet.address())

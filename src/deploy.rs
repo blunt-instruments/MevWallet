@@ -8,7 +8,7 @@ pub fn deploy_proxy<M>(client: Arc<M>, salt: impl Into<[u8; 32]>) -> ContractCal
 where
     M: Middleware,
 {
-    let factory = MevWalletV0Factory::new(*MEV_WALLET_PROXY_FACTORY_ADDR, client);
+    let factory = MevWalletV0Factory::new(MEV_WALLET_PROXY_FACTORY_ADDR, client);
 
     factory.create_wallet(salt.into())
 }
@@ -22,7 +22,7 @@ pub fn deploy_proxy_with_owner<M>(
 where
     M: Middleware,
 {
-    let factory = MevWalletV0Factory::new(*MEV_WALLET_PROXY_FACTORY_ADDR, client);
+    let factory = MevWalletV0Factory::new(MEV_WALLET_PROXY_FACTORY_ADDR, client);
 
     factory.create_wallet_with_owner(salt.into(), owner.into())
 }

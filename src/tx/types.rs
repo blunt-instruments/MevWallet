@@ -82,7 +82,7 @@ impl<'a> Eip712 for MevTx712<'a> {
     }
 
     fn type_hash() -> Result<[u8; 32], Self::Error> {
-        Ok(*crate::TX_TYPEHASH)
+        Ok(crate::TX_TYPEHASH)
     }
 
     fn struct_hash(&self) -> Result<[u8; 32], Self::Error> {
@@ -105,7 +105,7 @@ impl<'a> Eip712 for MevTx712<'a> {
 impl Tokenize for &MevTx {
     fn into_tokens(self) -> Vec<ethers::abi::Token> {
         (
-            *crate::TX_TYPEHASH,
+            crate::TX_TYPEHASH,
             self.to,
             H256::from(keccak256(&self.data)),
             self.value,
