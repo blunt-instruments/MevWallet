@@ -16,14 +16,6 @@ pub enum BuilderError {
     /// From wallet is not set.
     #[error("Missing Contract. Set `wallet()` on the builder")]
     MissingContract,
-    /// Signer has an unexpected chain id
-    #[error("Signer has an unexpected chain id. Tx has {tx}, signer has {signer}")]
-    ChainIdMismatch {
-        /// Transaction's chain id
-        tx: u64,
-        /// Signer's chain id
-        signer: u64,
-    },
     /// Custom error (e.g. signer)
     #[error("(0)")]
     Custom(String),
@@ -398,13 +390,6 @@ where
     /// Build and sign the transaction
     pub async fn build(self) -> Result<SignedMevTx, BuilderError> {
         let tx = self.builder.build()?;
-
-        if self.signer.chain_id() != tx.chain_id {
-            return Err(BuilderError::ChainIdMismatch {
-                tx: tx.chain_id,
-                signer: self.signer.chain_id(),
-            });
-        }
 
         tx.sign(self.signer)
             .await
