@@ -228,7 +228,7 @@ where
                     .client()
                     .resolve_name(name)
                     .await
-                    .map_err(|e| BuilderError::Custom(format!("{}", e)))?;
+                    .map_err(|e| BuilderError::Custom(format!("{e}")))?;
                 builder = builder.to(addr)
             }
             _ => {}
@@ -262,7 +262,7 @@ where
                 contract
                     .nonce()
                     .await
-                    .map_err(|e| BuilderError::Custom(format!("{}", e)))?,
+                    .map_err(|e| BuilderError::Custom(format!("{e}")))?,
             );
         }
         Ok(self)
@@ -294,7 +294,7 @@ where
             let (max_fee_per_gas, _) = provider
                 .estimate_eip1559_fees(None)
                 .await
-                .map_err(|e| BuilderError::Custom(format!("{}", e)))?;
+                .map_err(|e| BuilderError::Custom(format!("{e}")))?;
             self.max_base_fee = Some(max_fee_per_gas);
         }
 
@@ -393,7 +393,7 @@ where
 
         tx.sign(self.signer)
             .await
-            .map_err(|e| format!("{}", e))
+            .map_err(|e| format!("{e}"))
             .map_err(BuilderError::Custom)
     }
 }
