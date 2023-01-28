@@ -11,12 +11,16 @@ pub use bindings::mev_wallet_v1::MevWalletV1;
 pub mod tx;
 pub use crate::tx::{MevTx, MevTxBuilder, SignedMevTx};
 
+/// crate internal macros
+mod macros;
+
 /// Tooling for deploying new MevWallet proxies
 pub mod deploy;
 
 use ethers::types::H160;
 
-/// Mev transaction tx typehash: `fd4c9c9ceea85482c3671626f7b1c65bc2230325b86dbcb0f971327c3062c26a`
+/// Mev transaction tx typehash:
+/// `fd4c9c9ceea85482c3671626f7b1c65bc2230325b86dbcb0f971327c3062c26a`
 ///
 /// `keccak256(
 ///         "MevTx(address to,bytes data,int256 value,bool delegate,int256 tip,uint256 maxBaseFee,uint256 timing,uint256 nonce)"
@@ -72,5 +76,3 @@ mod test {
         );
     }
 }
-
-mod macros;
