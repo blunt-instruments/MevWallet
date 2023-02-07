@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import "forge-std/Test.sol";
 import {MevWalletV1} from "../contracts/MevWalletV1.sol";
 import {MevWalletV1Factory} from "../contracts/MevWalletV1Factory.sol";
-import {IERC20} from "./IERC20.sol";
+import {IERC20} from "../contracts/utils/IERC20.sol";
 import {MWB} from "./MWB.sol";
 import {IMevWeth} from "mev-weth/IMevWeth.sol";
 

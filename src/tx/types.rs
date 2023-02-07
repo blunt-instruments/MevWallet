@@ -10,7 +10,7 @@ use ethers::{
             eip2718::TypedTransaction,
             eip712::{EIP712Domain, Eip712},
         },
-        Eip1559TransactionRequest, H256, I256,
+        Eip1559TransactionRequest, SignatureError, H256, I256,
     },
     utils::keccak256,
 };
@@ -125,15 +125,19 @@ impl MevTx {
         ethers::abi::encode(&self.into_tokens())
     }
 
-    /// Sign the MEV transaction with the provided signer.
-    pub async fn sign<S: Signer>(mut self, signer: &S) -> Result<SignedMevTx, S::Error> {
-        let chain_id = signer.chain_id();
-        self.chain_id = chain_id;
-        let eip712 = MevTx712 {
+    /// Return an eip-712 struct referencing this tx, suitable for signing or
+    /// recovering signatures
+    pub fn eip_712(&self) -> MevTx712<'_> {
+        MevTx712 {
             wallet: self.wallet,
-            chain_id,
-            tx: &self,
-        };
+            chain_id: self.chain_id,
+            tx: self,
+        }
+    }
+
+    /// Sign the MEV transaction with the provided signer.
+    pub async fn sign<S: Signer>(self, signer: &S) -> Result<SignedMevTx, S::Error> {
+        let eip712 = self.eip_712();
         let sig = signer.sign_typed_data(&eip712).await?;
         Ok(SignedMevTx { tx: self, sig })
     }
@@ -189,7 +193,7 @@ impl SignedMevTx {
 
     /// Convert the Signed MEV tx into a call to the contract wallet
     pub fn into_call<M: Middleware>(self, middleware: Arc<M>) -> ContractCall<M, ()> {
-        let contract = MevWalletV1::new(self.tx.wallet, middleware);
+        let contract = self.wallet_contract(middleware);
         let mut r = [0u8; 32];
         let mut s = [0u8; 32];
         self.sig.r.to_big_endian(&mut r);
@@ -228,6 +232,11 @@ impl SignedMevTx {
         self.tx.wallet
     }
 
+    /// Return an instance of the wallet contract
+    pub fn wallet_contract<M: Middleware>(&self, middleware: Arc<M>) -> MevWalletV1<M> {
+        MevWalletV1::new(self.tx.wallet, middleware)
+    }
+
     /// Get the transaction details
     pub fn tx(&self) -> &MevTx {
         &self.tx
@@ -236,6 +245,11 @@ impl SignedMevTx {
     /// Get the signature
     pub fn sig(&self) -> Signature {
         self.sig
+    }
+
+    /// Get the signer
+    pub fn signer(&self) -> Result<Address, SignatureError> {
+        self.sig.recover_typed_data(self.tx.eip_712())
     }
 }
 

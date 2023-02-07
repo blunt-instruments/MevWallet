@@ -2,10 +2,7 @@
 pragma solidity ^0.8.17;
 
 import {Mevitize} from "mev-weth/Mevitize.sol";
-
-interface IERC20 {
-    function approve(address, uint256) external returns (bool);
-}
+import {IERC20} from "./IERC20.sol";
 
 // Helper contract for MevWallet draining
 contract Drain {

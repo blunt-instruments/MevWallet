@@ -4,13 +4,14 @@ use ethers::{
     prelude::ContractError,
     providers::{Middleware, PendingTransaction, ProviderError},
     signers::Signer,
-    types::Address,
+    types::{Address, U256},
 };
 use std::sync::Arc;
 
 use crate::{
+    bindings::ierc20::IERC20,
     deploy::{deploy_proxy, deploy_proxy_with_owner},
-    MevTx, MevWalletV1, SignedMevTx,
+    MevTx, MevWalletV1, SignedMevTx, MEV_WETH_ADDR,
 };
 
 use super::{BuilderError, MevTxBuilderInternal};
@@ -85,6 +86,28 @@ where
     /// Create a contract call object sending the signed mev transaction
     pub fn send(&self, tx: SignedMevTx) -> ethers::prelude::builders::ContractCall<M, ()> {
         tx.into_call(self.client())
+    }
+
+    /// True if the input `address` is the owner of this MevWallet, false
+    /// otherwise
+    pub async fn is_owner(&self, address: Address) -> Result<bool, ContractError<M>> {
+        Ok(self.owner().await? == address)
+    }
+
+    /// Checks the `MevWeth` balance of this MevWallet
+    pub async fn mev_weth_balance(&self) -> Result<U256, ContractError<M>> {
+        let mware = self.client();
+        IERC20::new(MEV_WETH_ADDR, mware)
+            .balance_of(self.address())
+            .await
+    }
+
+    /// Return the ETH balance of this MevWallet
+    pub async fn balance(&self) -> Result<U256, ContractError<M>> {
+        self.client()
+            .get_balance(self.address(), None)
+            .await
+            .map_err(ContractError::MiddlewareError)
     }
 }
 
