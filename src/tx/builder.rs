@@ -30,16 +30,27 @@ pub type SignedMevTxBuilder<'a, S> = SignedMevTxBuilderInternal<'a, (), S>;
 /// A Builder for `MevTx`
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct MevTxBuilderInternal<M> {
+    #[serde(skip_deserializing)]
     wallet: Option<M>,
+    #[serde(default)]
     chain_id: Option<u64>,
+    #[serde(default)]
     to: Option<Address>,
+    #[serde(default)]
     data: Option<Bytes>,
+    #[serde(default)]
     value: Option<I256>,
+    #[serde(default)]
     delegate: Option<bool>,
+    #[serde(default)]
     tip: Option<I256>,
+    #[serde(default)]
     max_base_fee: Option<U256>,
+    #[serde(default)]
     deadline: Option<U256>,
+    #[serde(default)]
     not_before: Option<U256>,
+    #[serde(default)]
     nonce: Option<U256>,
 }
 
