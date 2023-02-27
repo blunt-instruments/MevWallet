@@ -2,12 +2,6 @@
 	path = lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
 	branch = v1.2.0
-[submodule "lib/WETH10"]
-	path = lib/WETH10
-	url = https://github.com/WETH10/WETH10
 [submodule "lib/mev-weth"]
 	path = lib/mev-weth
-	url = git@github.com:prestwich/mev-weth.git
-[submodule "lib/MevWeth"]
-	path = lib/mev-weth
-	url = https://github.com/blunt-instruments/MevWeth
+	url = https://github.com/prestwich/mev-weth

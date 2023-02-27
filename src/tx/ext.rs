@@ -9,7 +9,7 @@ use ethers::{
 use std::sync::Arc;
 
 use crate::{
-    bindings::ierc20::IERC20,
+    bindings::{ierc20::IERC20, mev_wallet_v1::MevWalletV1Errors},
     deploy::{deploy_proxy, deploy_proxy_with_owner},
     MevTx, MevWalletV1, SignedMevTx, MEV_WETH_ADDR,
 };
@@ -37,11 +37,11 @@ where
             .await?
             .await
             .map_err(M::convert_err)
-            .map_err(ContractError::MiddlewareError)?;
+            .map_err(ContractError::from_middleware_error)?;
         if receipt.is_none() {
-            return Err(ContractError::MiddlewareError(M::convert_err(
-                ProviderError::CustomError("Could not get deploy tx receipt".to_owned()),
-            )));
+            return Err(
+                ProviderError::CustomError("Could not get deploy tx receipt".to_owned()).into(),
+            );
         }
         Ok(MevWalletV1::new(address, client))
     }
@@ -64,11 +64,11 @@ where
             .await?
             .await
             .map_err(M::convert_err)
-            .map_err(ContractError::MiddlewareError)?;
+            .map_err(ContractError::from_middleware_error)?;
         if receipt.is_none() {
-            return Err(ContractError::MiddlewareError(M::convert_err(
-                ProviderError::CustomError("Could not get deploy tx receipt".to_owned()),
-            )));
+            return Err(
+                ProviderError::CustomError("Could not get deploy tx receipt".to_owned()).into(),
+            );
         }
         Ok(MevWalletV1::new(address, client))
     }
@@ -107,7 +107,32 @@ where
         self.client()
             .get_balance(self.address(), None)
             .await
-            .map_err(ContractError::MiddlewareError)
+            .map_err(ContractError::from_middleware_error)
+    }
+
+    /// Simulate a tx. Returns `Ok(None)` for succesful execution. Returns Ok
+    /// (Some(err)) for contract revert. Returns Err(e) for error during
+    /// simulation
+    ///
+    pub async fn simulate(
+        &self,
+        tx: SignedMevTx,
+    ) -> Result<Option<MevWalletV1Errors>, ContractError<M>> {
+        let call = tx.into_call(self.client());
+
+        let result = call.await;
+
+        // execution succeeded
+        if result.is_ok() {
+            return Ok(None);
+        }
+        let err = result.expect_err("checked by is_ok");
+
+        if let Some(mev_err) = err.decode_contract_revert() {
+            Ok(Some(mev_err))
+        } else {
+            Err(err)
+        }
     }
 }
 

@@ -1,89 +1,725 @@
 pub use deploy_proxy_v0::*;
-#[allow(clippy::too_many_arguments, non_camel_case_types)]
+/// This module was auto-generated with ethers-rs Abigen.
+/// More information at: <https://github.com/gakonst/ethers-rs>
+#[allow(
+    clippy::enum_variant_names,
+    clippy::too_many_arguments,
+    clippy::upper_case_acronyms,
+    clippy::type_complexity,
+    dead_code,
+    non_camel_case_types,
+)]
 pub mod deploy_proxy_v0 {
-    #![allow(clippy::enum_variant_names)]
-    #![allow(dead_code)]
-    #![allow(clippy::type_complexity)]
-    #![allow(unused_imports)]
-    use ethers::contract::{
-        builders::{ContractCall, Event},
-        Contract, Lazy,
-    };
-    use ethers::core::{
-        abi::{Abi, Detokenize, InvalidOutputType, Token, Tokenizable},
-        types::*,
-    };
-    use ethers::providers::Middleware;
-    #[doc = "DeployProxyV0 was auto-generated with ethers-rs Abigen. More information at: https://github.com/gakonst/ethers-rs"]
-    use std::sync::Arc;
-    # [rustfmt :: skip] const __ABI : & str = "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\",\"components\":[],\"indexed\":false}],\"type\":\"event\",\"name\":\"proxy\",\"outputs\":[],\"anonymous\":false},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"IS_SCRIPT\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\",\"components\":[]}]},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\",\"components\":[]}],\"stateMutability\":\"pure\",\"type\":\"function\",\"name\":\"run\",\"outputs\":[]}]" ;
-    #[doc = r" The parsed JSON-ABI of the contract."]
-    pub static DEPLOYPROXYV0_ABI: ::ethers::contract::Lazy<::ethers::core::abi::Abi> =
-        ::ethers::contract::Lazy::new(|| {
-            ::ethers::core::utils::__serde_json::from_str(__ABI).expect("invalid abi")
-        });
-    #[doc = r" Bytecode of the #name contract"]
-    pub static DEPLOYPROXYV0_BYTECODE: ::ethers::contract::Lazy<::ethers::core::types::Bytes> =
-        ::ethers::contract::Lazy::new(|| {
-            "0x6080806040523461003d57600c80546001600160a81b03191674444544a54b5193ba6d1a3cf9c83ee12422b6a8240117905561011890816100438239f35b600080fdfe608080604052600436101561001357600080fd5b600090813560e01c908163ef6ac0f01461007a575063f8ccbf471461003757600080fd5b3461007757807ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261007757602060ff600c54166040519015158152f35b80fd5b9050346101075760207ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261010757807f08c379a0000000000000000000000000000000000000000000000000000000006064925260206004820152601f60248201527f4d657657616c6c6574563020757365206e6f74207265636f6d6d656e646564006044820152fd5b5080fdfea164736f6c6343000811000a" . parse () . expect ("invalid bytecode")
-        });
+    #[rustfmt::skip]
+    const __ABI: &str = "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\",\"components\":[],\"indexed\":false}],\"type\":\"event\",\"name\":\"proxy\",\"outputs\":[],\"anonymous\":false},{\"inputs\":[],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"IS_SCRIPT\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\",\"components\":[]}]},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\",\"components\":[]}],\"stateMutability\":\"pure\",\"type\":\"function\",\"name\":\"run\",\"outputs\":[]}]";
+    ///The parsed JSON ABI of the contract.
+    pub static DEPLOYPROXYV0_ABI: ::ethers::contract::Lazy<::ethers::core::abi::Abi> = ::ethers::contract::Lazy::new(||
+    ::ethers::core::utils::__serde_json::from_str(__ABI).expect("ABI is always valid"));
+    #[rustfmt::skip]
+    const __BYTECODE: &[u8] = &[
+        96,
+        128,
+        128,
+        96,
+        64,
+        82,
+        52,
+        97,
+        0,
+        61,
+        87,
+        96,
+        12,
+        128,
+        84,
+        96,
+        1,
+        96,
+        1,
+        96,
+        168,
+        27,
+        3,
+        25,
+        22,
+        116,
+        68,
+        69,
+        68,
+        165,
+        75,
+        81,
+        147,
+        186,
+        109,
+        26,
+        60,
+        249,
+        200,
+        62,
+        225,
+        36,
+        34,
+        182,
+        168,
+        36,
+        1,
+        23,
+        144,
+        85,
+        97,
+        1,
+        24,
+        144,
+        129,
+        97,
+        0,
+        67,
+        130,
+        57,
+        243,
+        91,
+        96,
+        0,
+        128,
+        253,
+        254,
+        96,
+        128,
+        128,
+        96,
+        64,
+        82,
+        96,
+        4,
+        54,
+        16,
+        21,
+        97,
+        0,
+        19,
+        87,
+        96,
+        0,
+        128,
+        253,
+        91,
+        96,
+        0,
+        144,
+        129,
+        53,
+        96,
+        224,
+        28,
+        144,
+        129,
+        99,
+        239,
+        106,
+        192,
+        240,
+        20,
+        97,
+        0,
+        122,
+        87,
+        80,
+        99,
+        248,
+        204,
+        191,
+        71,
+        20,
+        97,
+        0,
+        55,
+        87,
+        96,
+        0,
+        128,
+        253,
+        91,
+        52,
+        97,
+        0,
+        119,
+        87,
+        128,
+        127,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        252,
+        54,
+        1,
+        18,
+        97,
+        0,
+        119,
+        87,
+        96,
+        32,
+        96,
+        255,
+        96,
+        12,
+        84,
+        22,
+        96,
+        64,
+        81,
+        144,
+        21,
+        21,
+        129,
+        82,
+        243,
+        91,
+        128,
+        253,
+        91,
+        144,
+        80,
+        52,
+        97,
+        1,
+        7,
+        87,
+        96,
+        32,
+        127,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        252,
+        54,
+        1,
+        18,
+        97,
+        1,
+        7,
+        87,
+        128,
+        127,
+        8,
+        195,
+        121,
+        160,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        96,
+        100,
+        146,
+        82,
+        96,
+        32,
+        96,
+        4,
+        130,
+        1,
+        82,
+        96,
+        31,
+        96,
+        36,
+        130,
+        1,
+        82,
+        127,
+        77,
+        101,
+        118,
+        87,
+        97,
+        108,
+        108,
+        101,
+        116,
+        86,
+        48,
+        32,
+        117,
+        115,
+        101,
+        32,
+        110,
+        111,
+        116,
+        32,
+        114,
+        101,
+        99,
+        111,
+        109,
+        109,
+        101,
+        110,
+        100,
+        101,
+        100,
+        0,
+        96,
+        68,
+        130,
+        1,
+        82,
+        253,
+        91,
+        80,
+        128,
+        253,
+        254,
+        161,
+        100,
+        115,
+        111,
+        108,
+        99,
+        67,
+        0,
+        8,
+        17,
+        0,
+        10,
+    ];
+    ///The bytecode of the contract.
+    pub static DEPLOYPROXYV0_BYTECODE: ::ethers::core::types::Bytes = ::ethers::core::types::Bytes::from_static(
+        __BYTECODE,
+    );
+    #[rustfmt::skip]
+    const __DEPLOYED_BYTECODE: &[u8] = &[
+        96,
+        128,
+        128,
+        96,
+        64,
+        82,
+        96,
+        4,
+        54,
+        16,
+        21,
+        97,
+        0,
+        19,
+        87,
+        96,
+        0,
+        128,
+        253,
+        91,
+        96,
+        0,
+        144,
+        129,
+        53,
+        96,
+        224,
+        28,
+        144,
+        129,
+        99,
+        239,
+        106,
+        192,
+        240,
+        20,
+        97,
+        0,
+        122,
+        87,
+        80,
+        99,
+        248,
+        204,
+        191,
+        71,
+        20,
+        97,
+        0,
+        55,
+        87,
+        96,
+        0,
+        128,
+        253,
+        91,
+        52,
+        97,
+        0,
+        119,
+        87,
+        128,
+        127,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        252,
+        54,
+        1,
+        18,
+        97,
+        0,
+        119,
+        87,
+        96,
+        32,
+        96,
+        255,
+        96,
+        12,
+        84,
+        22,
+        96,
+        64,
+        81,
+        144,
+        21,
+        21,
+        129,
+        82,
+        243,
+        91,
+        128,
+        253,
+        91,
+        144,
+        80,
+        52,
+        97,
+        1,
+        7,
+        87,
+        96,
+        32,
+        127,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        255,
+        252,
+        54,
+        1,
+        18,
+        97,
+        1,
+        7,
+        87,
+        128,
+        127,
+        8,
+        195,
+        121,
+        160,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        96,
+        100,
+        146,
+        82,
+        96,
+        32,
+        96,
+        4,
+        130,
+        1,
+        82,
+        96,
+        31,
+        96,
+        36,
+        130,
+        1,
+        82,
+        127,
+        77,
+        101,
+        118,
+        87,
+        97,
+        108,
+        108,
+        101,
+        116,
+        86,
+        48,
+        32,
+        117,
+        115,
+        101,
+        32,
+        110,
+        111,
+        116,
+        32,
+        114,
+        101,
+        99,
+        111,
+        109,
+        109,
+        101,
+        110,
+        100,
+        101,
+        100,
+        0,
+        96,
+        68,
+        130,
+        1,
+        82,
+        253,
+        91,
+        80,
+        128,
+        253,
+        254,
+        161,
+        100,
+        115,
+        111,
+        108,
+        99,
+        67,
+        0,
+        8,
+        17,
+        0,
+        10,
+    ];
+    ///The deployed bytecode of the contract.
+    pub static DEPLOYPROXYV0_DEPLOYED_BYTECODE: ::ethers::core::types::Bytes = ::ethers::core::types::Bytes::from_static(
+        __DEPLOYED_BYTECODE,
+    );
     pub struct DeployProxyV0<M>(::ethers::contract::Contract<M>);
-    impl<M> Clone for DeployProxyV0<M> {
+    impl<M> ::core::clone::Clone for DeployProxyV0<M> {
         fn clone(&self) -> Self {
-            DeployProxyV0(self.0.clone())
+            Self(::core::clone::Clone::clone(&self.0))
         }
     }
-    impl<M> std::ops::Deref for DeployProxyV0<M> {
+    impl<M> ::core::ops::Deref for DeployProxyV0<M> {
         type Target = ::ethers::contract::Contract<M>;
         fn deref(&self) -> &Self::Target {
             &self.0
         }
     }
-    impl<M> std::fmt::Debug for DeployProxyV0<M> {
-        fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-            f.debug_tuple(stringify!(DeployProxyV0))
-                .field(&self.address())
-                .finish()
+    impl<M> ::core::ops::DerefMut for DeployProxyV0<M> {
+        fn deref_mut(&mut self) -> &mut Self::Target {
+            &mut self.0
+        }
+    }
+    impl<M> ::core::fmt::Debug for DeployProxyV0<M> {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+            f.debug_tuple(stringify!(DeployProxyV0)).field(&self.address()).finish()
         }
     }
     impl<M: ::ethers::providers::Middleware> DeployProxyV0<M> {
-        #[doc = r" Creates a new contract instance with the specified `ethers`"]
-        #[doc = r" client at the given `Address`. The contract derefs to a `ethers::Contract`"]
-        #[doc = r" object"]
+        /// Creates a new contract instance with the specified `ethers` client at
+        /// `address`. The contract derefs to a `ethers::Contract` object.
         pub fn new<T: Into<::ethers::core::types::Address>>(
             address: T,
             client: ::std::sync::Arc<M>,
         ) -> Self {
-            ::ethers::contract::Contract::new(address.into(), DEPLOYPROXYV0_ABI.clone(), client)
-                .into()
+            Self(
+                ::ethers::contract::Contract::new(
+                    address.into(),
+                    DEPLOYPROXYV0_ABI.clone(),
+                    client,
+                ),
+            )
         }
-        #[doc = r" Constructs the general purpose `Deployer` instance based on the provided constructor arguments and sends it."]
-        #[doc = r" Returns a new instance of a deployer that returns an instance of this contract after sending the transaction"]
-        #[doc = r""]
-        #[doc = r" Notes:"]
-        #[doc = r" 1. If there are no constructor arguments, you should pass `()` as the argument."]
-        #[doc = r" 1. The default poll duration is 7 seconds."]
-        #[doc = r" 1. The default number of confirmations is 1 block."]
-        #[doc = r""]
-        #[doc = r""]
-        #[doc = r" # Example"]
-        #[doc = r""]
-        #[doc = r" Generate contract bindings with `abigen!` and deploy a new contract instance."]
-        #[doc = r""]
-        #[doc = r" *Note*: this requires a `bytecode` and `abi` object in the `greeter.json` artifact."]
-        #[doc = r""]
-        #[doc = r" ```ignore"]
-        #[doc = r" # async fn deploy<M: ethers::providers::Middleware>(client: ::std::sync::Arc<M>) {"]
-        #[doc = r#"     abigen!(Greeter,"../greeter.json");"#]
-        #[doc = r""]
-        #[doc = r#"    let greeter_contract = Greeter::deploy(client, "Hello world!".to_string()).unwrap().send().await.unwrap();"#]
-        #[doc = r"    let msg = greeter_contract.greet().call().await.unwrap();"]
-        #[doc = r" # }"]
-        #[doc = r" ```"]
+        /// Constructs the general purpose `Deployer` instance based on the provided constructor arguments and sends it.
+        /// Returns a new instance of a deployer that returns an instance of this contract after sending the transaction
+        ///
+        /// Notes:
+        /// - If there are no constructor arguments, you should pass `()` as the argument.
+        /// - The default poll duration is 7 seconds.
+        /// - The default number of confirmations is 1 block.
+        ///
+        ///
+        /// # Example
+        ///
+        /// Generate contract bindings with `abigen!` and deploy a new contract instance.
+        ///
+        /// *Note*: this requires a `bytecode` and `abi` object in the `greeter.json` artifact.
+        ///
+        /// ```ignore
+        /// # async fn deploy<M: ethers::providers::Middleware>(client: ::std::sync::Arc<M>) {
+        ///     abigen!(Greeter, "../greeter.json");
+        ///
+        ///    let greeter_contract = Greeter::deploy(client, "Hello world!".to_string()).unwrap().send().await.unwrap();
+        ///    let msg = greeter_contract.greet().call().await.unwrap();
+        /// # }
+        /// ```
         pub fn deploy<T: ::ethers::core::abi::Tokenize>(
             client: ::std::sync::Arc<M>,
             constructor_args: T,
-        ) -> ::std::result::Result<
+        ) -> ::core::result::Result<
             ::ethers::contract::builders::ContractDeployer<M, Self>,
             ::ethers::contract::ContractError<M>,
         > {
@@ -96,70 +732,80 @@ pub mod deploy_proxy_v0 {
             let deployer = ::ethers::contract::ContractDeployer::new(deployer);
             Ok(deployer)
         }
-        #[doc = "Calls the contract's `IS_SCRIPT` (0xf8ccbf47) function"]
+        ///Calls the contract's `IS_SCRIPT` (0xf8ccbf47) function
         pub fn is_script(&self) -> ::ethers::contract::builders::ContractCall<M, bool> {
             self.0
                 .method_hash([248, 204, 191, 71], ())
                 .expect("method not found (this should never happen)")
         }
-        #[doc = "Calls the contract's `run` (0xef6ac0f0) function"]
-        pub fn run(&self, p0: [u8; 32]) -> ::ethers::contract::builders::ContractCall<M, ()> {
+        ///Calls the contract's `run` (0xef6ac0f0) function
+        pub fn run(
+            &self,
+            p0: [u8; 32],
+        ) -> ::ethers::contract::builders::ContractCall<M, ()> {
             self.0
                 .method_hash([239, 106, 192, 240], p0)
                 .expect("method not found (this should never happen)")
         }
-        #[doc = "Gets the contract's `proxy` event"]
-        pub fn proxy_filter(&self) -> ::ethers::contract::builders::Event<M, ProxyFilter> {
+        ///Gets the contract's `proxy` event
+        pub fn proxy_filter(
+            &self,
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, ProxyFilter> {
             self.0.event()
         }
-        #[doc = r" Returns an [`Event`](#ethers_contract::builders::Event) builder for all events of this contract"]
-        pub fn events(&self) -> ::ethers::contract::builders::Event<M, ProxyFilter> {
-            self.0.event_with_filter(Default::default())
+        /// Returns an `Event` builder for all the events of this contract.
+        pub fn events(
+            &self,
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, ProxyFilter> {
+            self.0.event_with_filter(::core::default::Default::default())
         }
     }
     impl<M: ::ethers::providers::Middleware> From<::ethers::contract::Contract<M>>
-        for DeployProxyV0<M>
-    {
+    for DeployProxyV0<M> {
         fn from(contract: ::ethers::contract::Contract<M>) -> Self {
-            Self(contract)
+            Self::new(contract.address(), contract.client())
         }
     }
     #[derive(
         Clone,
-        Debug,
-        Eq,
-        PartialEq,
-        :: ethers :: contract :: EthEvent,
-        :: ethers :: contract :: EthDisplay,
+        ::ethers::contract::EthEvent,
+        ::ethers::contract::EthDisplay,
         Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash
     )]
     #[ethevent(name = "proxy", abi = "proxy(address)")]
     pub struct ProxyFilter(pub ::ethers::core::types::Address);
-    #[doc = "Container type for all input parameters for the `IS_SCRIPT` function with signature `IS_SCRIPT()` and selector `0xf8ccbf47`"]
+    ///Container type for all input parameters for the `IS_SCRIPT` function with signature `IS_SCRIPT()` and selector `0xf8ccbf47`
     #[derive(
         Clone,
-        Debug,
-        Eq,
-        PartialEq,
-        :: ethers :: contract :: EthCall,
-        :: ethers :: contract :: EthDisplay,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
         Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash
     )]
     #[ethcall(name = "IS_SCRIPT", abi = "IS_SCRIPT()")]
     pub struct IsScriptCall;
-    #[doc = "Container type for all input parameters for the `run` function with signature `run(bytes32)` and selector `0xef6ac0f0`"]
+    ///Container type for all input parameters for the `run` function with signature `run(bytes32)` and selector `0xef6ac0f0`
     #[derive(
         Clone,
-        Debug,
-        Eq,
-        PartialEq,
-        :: ethers :: contract :: EthCall,
-        :: ethers :: contract :: EthDisplay,
+        ::ethers::contract::EthCall,
+        ::ethers::contract::EthDisplay,
         Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash
     )]
     #[ethcall(name = "run", abi = "run(bytes32)")]
     pub struct RunCall(pub [u8; 32]);
-    #[derive(Debug, Clone, PartialEq, Eq, :: ethers :: contract :: EthAbiType)]
+    ///Container type for all of the contract's call
+    #[derive(Clone, ::ethers::contract::EthAbiType, Debug, PartialEq, Eq, Hash)]
     pub enum DeployProxyV0Calls {
         IsScript(IsScriptCall),
         Run(RunCall),
@@ -167,15 +813,15 @@ pub mod deploy_proxy_v0 {
     impl ::ethers::core::abi::AbiDecode for DeployProxyV0Calls {
         fn decode(
             data: impl AsRef<[u8]>,
-        ) -> ::std::result::Result<Self, ::ethers::core::abi::AbiError> {
-            if let Ok(decoded) =
-                <IsScriptCall as ::ethers::core::abi::AbiDecode>::decode(data.as_ref())
-            {
-                return Ok(DeployProxyV0Calls::IsScript(decoded));
+        ) -> ::core::result::Result<Self, ::ethers::core::abi::AbiError> {
+            let data = data.as_ref();
+            if let Ok(decoded)
+                = <IsScriptCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+                return Ok(Self::IsScript(decoded));
             }
-            if let Ok(decoded) = <RunCall as ::ethers::core::abi::AbiDecode>::decode(data.as_ref())
-            {
-                return Ok(DeployProxyV0Calls::Run(decoded));
+            if let Ok(decoded)
+                = <RunCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+                return Ok(Self::Run(decoded));
             }
             Err(::ethers::core::abi::Error::InvalidData.into())
         }
@@ -183,38 +829,41 @@ pub mod deploy_proxy_v0 {
     impl ::ethers::core::abi::AbiEncode for DeployProxyV0Calls {
         fn encode(self) -> Vec<u8> {
             match self {
-                DeployProxyV0Calls::IsScript(element) => element.encode(),
-                DeployProxyV0Calls::Run(element) => element.encode(),
+                Self::IsScript(element) => {
+                    ::ethers::core::abi::AbiEncode::encode(element)
+                }
+                Self::Run(element) => ::ethers::core::abi::AbiEncode::encode(element),
             }
         }
     }
-    impl ::std::fmt::Display for DeployProxyV0Calls {
-        fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+    impl ::core::fmt::Display for DeployProxyV0Calls {
+        fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
             match self {
-                DeployProxyV0Calls::IsScript(element) => element.fmt(f),
-                DeployProxyV0Calls::Run(element) => element.fmt(f),
+                Self::IsScript(element) => ::core::fmt::Display::fmt(element, f),
+                Self::Run(element) => ::core::fmt::Display::fmt(element, f),
             }
         }
     }
-    impl ::std::convert::From<IsScriptCall> for DeployProxyV0Calls {
-        fn from(var: IsScriptCall) -> Self {
-            DeployProxyV0Calls::IsScript(var)
+    impl ::core::convert::From<IsScriptCall> for DeployProxyV0Calls {
+        fn from(value: IsScriptCall) -> Self {
+            Self::IsScript(value)
         }
     }
-    impl ::std::convert::From<RunCall> for DeployProxyV0Calls {
-        fn from(var: RunCall) -> Self {
-            DeployProxyV0Calls::Run(var)
+    impl ::core::convert::From<RunCall> for DeployProxyV0Calls {
+        fn from(value: RunCall) -> Self {
+            Self::Run(value)
         }
     }
-    #[doc = "Container type for all return fields from the `IS_SCRIPT` function with signature `IS_SCRIPT()` and selector `0xf8ccbf47`"]
+    ///Container type for all return fields from the `IS_SCRIPT` function with signature `IS_SCRIPT()` and selector `0xf8ccbf47`
     #[derive(
         Clone,
-        Debug,
-        Eq,
-        PartialEq,
-        :: ethers :: contract :: EthAbiType,
-        :: ethers :: contract :: EthAbiCodec,
+        ::ethers::contract::EthAbiType,
+        ::ethers::contract::EthAbiCodec,
         Default,
+        Debug,
+        PartialEq,
+        Eq,
+        Hash
     )]
     pub struct IsScriptReturn(pub bool);
 }

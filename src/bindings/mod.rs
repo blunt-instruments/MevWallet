@@ -19,4 +19,3 @@ pub mod mev_wallet_v1;
 pub mod mev_wallet_v1_factory;
 pub mod mevitize;
 pub mod mwb;
-pub mod std_chains;
