@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 
 use ethers::{
-    prelude::ContractError,
+    prelude::{ContractCall, ContractError},
     providers::{Middleware, PendingTransaction, ProviderError},
     signers::Signer,
     types::{Address, U256},
@@ -9,7 +9,10 @@ use ethers::{
 use std::sync::Arc;
 
 use crate::{
-    bindings::{ierc20::IERC20, mev_wallet_v1::MevWalletV1Errors},
+    bindings::{
+        ierc20::IERC20,
+        mev_wallet_v1::{MevWalletV1Errors, ProvideValue},
+    },
     deploy::{deploy_proxy, deploy_proxy_with_owner},
     MevTx, MevWalletV1, SignedMevTx, MEV_WETH_ADDR,
 };
@@ -116,11 +119,9 @@ where
     ///
     pub async fn simulate(
         &self,
-        tx: SignedMevTx,
+        call: &ContractCall<M, ()>,
     ) -> Result<Option<MevWalletV1Errors>, ContractError<M>> {
-        let call = tx.into_call(self.client());
-
-        let result = call.await;
+        let result = call.clone().await;
 
         // execution succeeded
         if result.is_ok() {
@@ -128,10 +129,63 @@ where
         }
         let err = result.expect_err("checked by is_ok");
 
-        if let Some(mev_err) = err.decode_contract_revert() {
-            Ok(Some(mev_err))
-        } else {
-            Err(err)
+        match err.decode_contract_revert() {
+            Some(mev_err) => Ok(Some(mev_err)),
+            None => Err(err),
+        }
+    }
+
+    /// Resolve any call attribute that can be resolved, return a
+    pub async fn resolve_call(
+        &self,
+        tx: SignedMevTx,
+    ) -> Result<Option<ContractCall<M, ()>>, ContractError<M>> {
+        let mut call = tx.into_call(self.client());
+
+        loop {
+            let res = self.simulate(&call).await?;
+            if res.is_none() {
+                return Ok(Some(call));
+            }
+            let err = res.unwrap();
+            if err.terminal() {
+                return Ok(None);
+            }
+            let _ = err.apply_to(&mut call);
+        }
+    }
+}
+
+impl MevWalletV1Errors {
+    fn terminal(&self) -> bool {
+        match self {
+            MevWalletV1Errors::ExactBaseFee(_) => false,
+            MevWalletV1Errors::HighBaseFee(_) => true, // todo: waiter?
+            MevWalletV1Errors::MissingNonce(_) => true, // todo: waiter?
+            MevWalletV1Errors::NotBefore(_) => true,   // todo: waiter
+            MevWalletV1Errors::PermanentlyInvalid(_) => true,
+            MevWalletV1Errors::ProvideValue(_) => false,
+            MevWalletV1Errors::Reverted(_) => true,
+            MevWalletV1Errors::UsedNonce(_) => true,
+            MevWalletV1Errors::WrongSigner(_) => true,
+            MevWalletV1Errors::RevertString(_) => true,
+        }
+    }
+
+    fn apply_to<M>(self, call: &mut ContractCall<M, ()>) -> Result<(), MevWalletV1Errors> {
+        match self {
+            MevWalletV1Errors::ExactBaseFee(_) => {
+                call.tx
+                    .as_eip1559_mut()
+                    .expect("no legacy txns")
+                    .max_priority_fee_per_gas = Some(U256::zero());
+                Ok(())
+            }
+            MevWalletV1Errors::ProvideValue(ProvideValue(amnt)) => {
+                call.tx.as_eip1559_mut().expect("no legacy txns").value = Some(amnt);
+                Ok(())
+            }
+            _ => Err(self),
         }
     }
 }
