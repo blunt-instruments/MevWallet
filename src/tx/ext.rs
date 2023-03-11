@@ -135,7 +135,7 @@ where
         }
     }
 
-    /// Resolve any call attribute that can be resolved, return a
+    /// Resolve any call attribute that can be resolved, return a call
     pub async fn resolve_call(
         &self,
         tx: SignedMevTx,

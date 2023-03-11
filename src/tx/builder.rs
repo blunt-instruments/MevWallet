@@ -30,8 +30,10 @@ pub type SignedMevTxBuilder<'a, S> = SignedMevTxBuilderInternal<'a, (), S>;
 /// A Builder for `MevTx`
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct MevTxBuilderInternal<M> {
-    #[serde(skip_deserializing)]
-    wallet: Option<M>,
+    #[serde(skip_deserializing, skip_serializing)]
+    contract: Option<M>,
+    #[serde(default)]
+    wallet: Option<Address>,
     #[serde(default)]
     chain_id: Option<u64>,
     #[serde(default)]
@@ -59,6 +61,7 @@ impl Default for MevTxBuilder {
     fn default() -> Self {
         Self {
             chain_id: Default::default(),
+            contract: Default::default(),
             wallet: Default::default(),
             to: Default::default(),
             data: Default::default(),
@@ -105,7 +108,8 @@ impl<C> MevTxBuilderInternal<C> {
     {
         MevTxBuilderInternal {
             chain_id: self.chain_id,
-            wallet: Some(contract.clone()),
+            contract: Some(contract.clone()),
+            wallet: Some(contract.address()),
             to: self.to,
             data: self.data,
             value: self.value,
@@ -267,7 +271,10 @@ where
     where
         M: Middleware + 'static,
     {
-        let contract = self.wallet.as_ref().ok_or(BuilderError::MissingContract)?;
+        let contract = self
+            .contract
+            .as_ref()
+            .ok_or(BuilderError::MissingContract)?;
         if self.nonce.is_none() {
             self.nonce = Some(
                 contract
@@ -296,7 +303,7 @@ where
         M: Middleware + 'static,
     {
         let provider = self
-            .wallet
+            .contract
             .as_ref()
             .ok_or(BuilderError::MissingContract)?
             .client();
@@ -332,7 +339,7 @@ where
 
         Ok(MevTx {
             chain_id: self.chain_id.unwrap_or(1),
-            wallet: self.wallet.expect("checked by missing_keys").address(),
+            wallet: self.wallet.expect("checked by missing_keys"),
             to: self.to.expect("checked by missing_keys"),
             data: self.data.unwrap_or_default(),
             value: self.value.unwrap_or_default(),
