@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use ethers::{
     prelude::{Address, Bytes, EthCall, U256},
     providers::Middleware,
@@ -101,6 +103,38 @@ impl MevTxBuilderInternal<()> {
 }
 
 impl<C> MevTxBuilderInternal<C> {
+    /// Add a wallet address
+    pub fn wallet_address(mut self, address: Address) -> Self {
+        self.wallet = Some(address);
+        self
+    }
+
+    /// Instantiate a [`MevWalletV1`] with the provided `Middleware`. Must already
+    /// have an address
+    pub fn with_mware<M>(self, mware: Arc<M>) -> Result<MevTxBuilderInternal<MevWalletV1<M>>, Self>
+    where
+        M: Middleware + 'static,
+    {
+        if let Some(address) = self.wallet {
+            Ok(self.address_with_mware(address, mware))
+        } else {
+            Err(self)
+        }
+    }
+
+    /// Add an address and instatiate a [`MevWalletV1`] with the provided middleware
+    pub fn address_with_mware<M>(
+        self,
+        address: Address,
+        mware: Arc<M>,
+    ) -> MevTxBuilderInternal<MevWalletV1<M>>
+    where
+        M: Middleware + 'static,
+    {
+        let contract = MevWalletV1::new(address, mware);
+        self.wallet(&contract)
+    }
+
     /// Set the MevWallet from which this tx will be sent
     pub fn wallet<M>(self, contract: &MevWalletV1<M>) -> MevTxBuilderInternal<MevWalletV1<M>>
     where
